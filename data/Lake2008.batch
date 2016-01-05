@@ -1,0 +1,97 @@
+####Lake2008 Analysis Batch File######
+### Written by Mario Muscarella
+### Last Update 2/25/12
+###Use '#' to ignore line
+##files needed: silva.bacteria.fasta, silva.gold.align, silva.bacteria.rdp6.tax, nogap.bacteria.fasta
+#To Run batch file use: $./mothur ________.batch , make sure you are in appropriate directory
+
+#First have have to extract the sequences from the .sff files
+sffinfo(sff=r1_reads.sff)
+sffinfo(sff=r2_reads.sff)
+
+#Once the sequences have been extracted and the fasta and quality files generated, I find that it helps to rename them.
+system(copy r2_reads.fasta lake2008_DNA.fasta)
+system(copy r1_reads.fasta lake2008_cDNA.fasta)
+system(copy r2_reads.qual lake2008_DNA.qual)
+system(copy r1_reads.qual lake2008_cDNA.qual)
+
+#First Look
+summary.seqs(fasta=lake2008_DNA.fasta)
+summary.seqs(fasta=lake2008_cDNA.fasta)
+
+### DNA ######
+#Start by removing primers and barcodes, assigning sequences to groups based on barcodes, and trim low quality reads. This also creats group files
+trim.seqs(fasta=lake2008_DNA.fasta, oligos=lake2008_DNA.oligos, qfile=lake2008_DNA.qual, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50)
+summary.seqs(fasta=lake2008_DNA.fasta)
+
+#Make the # of sequences smaller by looking using only the unique sequences. This will also creat the name file
+unique.seqs(fasta=lake2008_DNA.trim.fasta)
+summary.seqs(fasta=lake2008_DNA.trim.unique.fasta)
+
+#Once the sequences have been trimmed and only unique are included in the analysis, we can align. I use the silva alignment as my template
+align.seqs(candidate=lake2008_DNA.trim.unique.fasta, template=silva.bacteria.fasta, flip=T)
+summary.seqs(fasta=lake2008_DNA.trim.unique.align)
+
+#We want only the sequences that are the correct region and size. Trim out the bad ones. It is always good to look at what we throw away
+screen.seqs(fasta=lake2008_DNA.trim.unique.align, name=lake2008_DNA.trim.names, group=lake2008_DNA.groups, start=15647, end=22587)
+summary.seqs(fasta=lake2008_DNA.trim.unique.good.align)
+
+#Once you have screened the sequences you can get rid of gaps inserted by the alignment. 
+filter.seqs(fasta=lake2008_DNA.trim.unique.good.align, vertical=T, trump=.)
+summary.seqs(fasta=lake2008_DNA.trim.unique.good.filter.fasta)
+
+#Pre clustering allows us to combine sequences that are highly similar. Here we will combine those with only one nucleotide difference (each). Since you will prob bin based on 97% this does nothing but make things faster
+pre.cluster(fasta=lake2008_DNA.trim.unique.good.filter.fasta, name=lake2008_DNA.trim.good.names, diffs=1)
+summary.seqs(fasta=current,name=current)
+
+#It helps to classify the sequences here to make sure things look OK. You may end up with Chloroplast DNA and you can remove it later.
+#classify.seqs(fasta=current, template=silva.bacteria.fasta, taxonomy=silva.bacteria.silva.tax, group=current)
+#phylotype(taxonomy=lake2008_DNA.trim.unique.good.filter.precluster.silva.taxonomy, name=current)
+
+### cDNA ######
+
+#trim.seqs(fasta=lake2008_cDNA.fasta, oligos=lake2008_cDNA.oligos, qfile=lake2008_cDNA.qual, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50)
+#summary.seqs(fasta=lake2008_cDNA.fasta)
+
+#unique.seqs(fasta=lake2008_cDNA.trim.fasta)
+#summary.seqs(fasta=lake2008_cDNA.trim.unique.fasta)
+
+
+#align.seqs(candidate=lake2008_cDNA.trim.unique.fasta, template=silva.bacteria.fasta, flip=T)
+#summary.seqs(fasta=lake2008_cDNA.trim.unique.align)
+
+#screen.seqs(fasta=lake2008_cDNA.trim.unique.align, name=lake2008_cDNA.trim.names, group=lake2008_cDNA.groups, start=15647, end=22587)
+#summary.seqs(fasta=lake2008_cDNA.trim.unique.good.align)
+
+#filter.seqs(fasta=lake2008_cDNA.trim.unique.good.align, vertical=T, trump=.)
+#summary.seqs(fasta=lake2008_cDNA.trim.unique.good.filter.fasta)
+
+
+#pre.cluster(fasta=lake2008_cDNA.trim.unique.good.filter.fasta, name=lake2008_cDNA.trim.good.names, diffs=1)
+#summary.seqs(fasta=current,name=current)
+
+#classify.seqs(fasta=current, template=silva.bacteria.fasta, taxonomy=silva.bacteria.silva.tax, group=current)
+#phylotype(taxonomy=lake2008_cDNA.trim.unique.good.filter.precluster.silva.taxonomy, name=current)
+
+
+#### OTU Analysis #######
+
+####DNA#####
+
+dist.seqs(fasta=current, output=lt)
+
+cluster(phylip=current, name=current, method=average)
+
+
+####AMOVA (nonparametric analysis of molecular variance#####
+
+amova(phylip=current, design=lake2008_DNA.design, alpha=0.05, iters=1000)
+#anova(phylip=current, design=lake2008_cDNA.design, alpha=0.05, iters=1000)
+
+####LibShuff####
+libshuff(phylip=current, group=current, iters=1000)
+
+####Anosim#####
+
+anosim(phylip=current, design=lake2008_DNA.design, alpha.0.05, iters=1000)
+
