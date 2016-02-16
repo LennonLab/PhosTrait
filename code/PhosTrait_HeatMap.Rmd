@@ -21,6 +21,10 @@ require("png")
 require("vegan")
 require("pvclust")
 require("gplots")
+require("gridGraphics")
+require("grid")
+require("gplots")
+require("gridExtra")
 ```
 
 Load data (note this is raw growth rates; not phylogenetically correct)
@@ -29,7 +33,12 @@ setwd("~/GitHub/PhosTrait")
 gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
 str(gr.data)
 colnames(gr.data)[1]<-"isolate"
+
+# Data standardizing - log10 tranformation
 log.gr <- log10(gr.data[,2:19]+1)
+
+# Data standardizing - divide by sum of species growth
+gr.std <- gr.data[,2:19] / (apply(gr.data[,2:19], 1, sum))
 ```
 
 Customize Color Palette
@@ -37,52 +46,93 @@ Customize Color Palette
 jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", 
                                  "#7FFF7F", "yellow", "#FF7F00", "red", 
                                  "#7F0000"))
+
+gray.colors <- gray.colors(25, start = 0.9, end = 0.1, gamma = 1.5, alpha = 1)
 ```
 
 Randomize growth rate data and make heatmap
 ```{r}
+set.seed(4672)
 rand.row <- log.gr[sample(nrow(log.gr)),]
+set.seed(9764)
+rand.row2 <-log.gr[sample(nrow(log.gr)),]
+set.seed(9863)
 rand.col <- rand.row[sample(ncol(rand.row))]
-rand.log.gr <- rand.col
-rand.heat <- heatmap.2(as.matrix(rand.log.gr), distfun = function(x) vegdist(x, method = "bray"),
+rand.gr.std <- rand.col
+rand.heat <- heatmap.2(as.matrix(rand.gr.std), distfun = function(x) 
+          vegdist(x, method = "bray"),
           hclustfun = function(x) hclust(x, method = "ward.D2"), 
-          col = jet.colors(100), trace = "none", density.info = "none")
+          col = gray.colors, trace = "none", density.info = "none")
 ```
 
 Calculate column-wise growth rate data (mean and sd) and make heatmap
 ```{r}
 col.means <-colMeans(log.gr)
 col.sd <- apply(log.gr, 2, sd)
-col.wise <- mapply(rnorm,nrow(log.gr),col.means,col.sd/10)
-colnames(col.wise) <-colnames(log.gr)
-col.heat <- heatmap.2(as.matrix(col.wise), distfun = function(x) vegdist(x, method = "bray"),
+col.wise <- mapply(rnorm, nrow(log.gr), col.means, col.sd/30)
+colnames(col.wise) <- colnames(log.gr)
+col.heat <- heatmap.2(as.matrix(col.wise), distfun = function(x) 
+          vegdist(x, method = "bray"),
           hclustfun = function(x) hclust(x, method = "ward.D2"), 
-          col = jet.colors(100), trace = "none", density.info = "none")
+          col = gray.colors, trace = "none", density.info = "none")
 ```
 
 Calculate row-wise growth rate data (mean and sd) and make heatmap
 ```{r}
 row.means <-rowMeans(log.gr)
 row.sd <- apply(log.gr, 1, sd)
-row.wise <- t(mapply(rnorm,ncol(log.gr),row.means,row.sd/10))
-colnames(row.wise) <-colnames(log.gr)
-row.heat <- heatmap.2(as.matrix(row.wise), distfun = function(x) vegdist(x, method = "bray"),
+row.wise <- t(mapply(rnorm,ncol(log.gr), row.means, row.sd/10))
+colnames(row.wise) <- colnames(log.gr)
+row.heat <- heatmap.2(as.matrix(row.wise), distfun = function(x) 
+          vegdist(x, method = "bray"),
           hclustfun = function(x) hclust(x, method = "ward.D2"), 
-          col = jet.colors(100), trace = "none", density.info = "none")
+          col = gray.colors, trace = "none", density.info = "none")
 ```
 
 Actual growth rate data as heatmap
 ```{r}
-heatmap.2(as.matrix(log.gr), distfun = function(x) vegdist(x, method = "bray"),
-          hclustfun = function(x) hclust(x, method = "ward.D2"), 
-          col = jet.colors(100), trace = "none", density.info = "none")
+actual.heat <- heatmap.2(as.matrix(gr.std), distfun = function(x) 
+          vegdist(x, method = "bray"), hclustfun = function(x) 
+          hclust(x, method = "ward.D2"), col = gray.colors, trace = "none", 
+          density.info = "none")
 ```
 
+Make multipanel heatmap
+```{r}
+# Generation instructions for approach here: http://stackoverflow.com/questions/13081310/combining-multiple-complex-plots-as-panels-in-a-single-figure
 
-----> Notes and questions:
-  -- should check to make sure these hypothetical scenarios are done correctly 
-  -- not sure why we need to log tranform; perhaps could also change color bins reoslution
-  -- not entirely sure row-wise is correct with transpose
-  -- something is not right in that random and actualy growth rates look identical
-  -- evaluate whether row-wise and column-wise logic makes sense
-  -- put into multipanel figure
+# Make a list of dataframes for each scenario
+heat.list <- list(rand.gr.std, col.wise, row.wise, gr.std)
+
+# Vector of names for P resources
+resources <- colnames(row.wise)
+
+# Function for running through list
+grab_grob <- function(){
+  grid.echo()
+  grid.grab()
+}
+
+gl <- lapply(1:4, function(i){
+  heatmap.2(as.matrix(heat.list[[i]]), dendrogram = 'row',
+            Colv = FALSE, col = jet.colors, 
+            key = FALSE, keysize = 1.0, symkey = FALSE, density.info = 'none',
+            trace = 'none', colsep = 1:10,
+            sepcolor = 'white', sepwidth = 0.05,
+            scale = "none", cexRow = 1.5, cexCol = 1.5,
+            labCol = resources,                 
+            hclustfun = function(c){hclust(c, method='mcquitty')},
+            lmat = rbind( c(0, 3), c(2,1), c(0,4) ), lhei = c(0.25, 4, 0.25 ),                 
+  )
+  grab_grob()
+})
+
+png(filename="~/GitHub/PhosTrait/figures/HeatMap.png", width = 2400, 
+    height = 2400, res = 96*2)
+
+grid.newpage()
+grid.arrange(grobs = gl, ncol = 2, clip = TRUE)
+
+dev.off()
+graphics.off()
+```
