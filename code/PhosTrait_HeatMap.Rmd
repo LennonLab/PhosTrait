@@ -1,0 +1,88 @@
+title: "Phosphorus Traits"
+author: "Jay T. Lennon, Mario Muscarella, Kali Bird"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+  - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+Generalist and specialist strategies of phosphorus acquistion by aquatic bacteria 
+
+```{r}
+rm(list=ls())
+getwd()
+setwd("~/GitHub/PhosTrait")
+```
+
+Load package for writing figures
+```{r}
+require("png")
+require("vegan")
+require("pvclust")
+require("gplots")
+```
+
+Load data (note this is raw growth rates; not phylogenetically correct)
+```{r}
+setwd("~/GitHub/PhosTrait")
+gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
+str(gr.data)
+colnames(gr.data)[1]<-"isolate"
+log.gr <- log10(gr.data[,2:19]+1)
+```
+
+Customize Color Palette
+```{r}
+jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", 
+                                 "#7FFF7F", "yellow", "#FF7F00", "red", 
+                                 "#7F0000"))
+```
+
+Randomize growth rate data and make heatmap
+```{r}
+rand.row <- log.gr[sample(nrow(log.gr)),]
+rand.col <- rand.row[sample(ncol(rand.row))]
+rand.log.gr <- rand.col
+rand.heat <- heatmap.2(as.matrix(rand.log.gr), distfun = function(x) vegdist(x, method = "bray"),
+          hclustfun = function(x) hclust(x, method = "ward.D2"), 
+          col = jet.colors(100), trace = "none", density.info = "none")
+```
+
+Calculate column-wise growth rate data (mean and sd) and make heatmap
+```{r}
+col.means <-colMeans(log.gr)
+col.sd <- apply(log.gr, 2, sd)
+col.wise <- mapply(rnorm,nrow(log.gr),col.means,col.sd/10)
+colnames(col.wise) <-colnames(log.gr)
+col.heat <- heatmap.2(as.matrix(col.wise), distfun = function(x) vegdist(x, method = "bray"),
+          hclustfun = function(x) hclust(x, method = "ward.D2"), 
+          col = jet.colors(100), trace = "none", density.info = "none")
+```
+
+Calculate row-wise growth rate data (mean and sd) and make heatmap
+```{r}
+row.means <-rowMeans(log.gr)
+row.sd <- apply(log.gr, 1, sd)
+row.wise <- t(mapply(rnorm,ncol(log.gr),row.means,row.sd/10))
+colnames(row.wise) <-colnames(log.gr)
+row.heat <- heatmap.2(as.matrix(row.wise), distfun = function(x) vegdist(x, method = "bray"),
+          hclustfun = function(x) hclust(x, method = "ward.D2"), 
+          col = jet.colors(100), trace = "none", density.info = "none")
+```
+
+Actual growth rate data as heatmap
+```{r}
+heatmap.2(as.matrix(log.gr), distfun = function(x) vegdist(x, method = "bray"),
+          hclustfun = function(x) hclust(x, method = "ward.D2"), 
+          col = jet.colors(100), trace = "none", density.info = "none")
+```
+
+
+----> Notes and questions:
+  -- should check to make sure these hypothetical scenarios are done correctly 
+  -- not sure why we need to log tranform; perhaps could also change color bins reoslution
+  -- not entirely sure row-wise is correct with transpose
+  -- something is not right in that random and actualy growth rates look identical
+  -- evaluate whether row-wise and column-wise logic makes sense
+  -- put into multipanel figure
