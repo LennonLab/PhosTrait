@@ -20,456 +20,86 @@ Load package for writing figures
 require("png")
 require("vegan")
 require("pvclust")
+require("mclust")
+require("fpc")
 ```
 
-Load data (note this is raw growth rates; not phylogenetically correct)
+Load data and standardize 
 ```{r}
-setwd("~/GitHub/PhosTrait")
+# Raw growth rate data
 gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
 str(gr.data)
 colnames(gr.data)[1]<-"isolate"
+
+# Data standardizing - log10 tranformation
+log.gr <- log10(gr.data[,2:19]+1)
+
+# Data standardizing - divide by sum of species growth
+gr.std <- gr.data[,2:19] / (apply(gr.data[,2:19], 1, sum))
+
+# Choose data for clustering
+data <- gr.std
 ```
 
-Manhattan-Ward
+Hierarchical clustering
 ```{r}
-pvclust.MW <- pvclust(gr.data[,2:19], nboot=10000, method.dist="manhattan", 
-                      method.hclust="ward.D")
-png(filename="~/GitHub/PhosTrait/figures/Cluster.MW.png",
+# Identify distance metric
+dist <- "euclidean" 
+    # manhattan, correlation, uncentered,
+    # abscor, euclidean
+
+# Identify agglomerative method
+clust <- "average"   
+    # complete = furthest neighbor; compact clusters, sensitive to outliers
+    # average = UPGMA; considered robust
+    # ward.D = popular, but makes clusters of equal size and sensitive to outliers
+    # ward.D2 = dissimilarities are squared before clustering
+    # mcquitty
+    # median = downweights outliers
+    # centroid = fairly robust
+    # single = nearest neighbor; chaining problem
+                    
+# Peform hierarchical cluster analysis (reduce nboot to 100 when playing)
+pv.clust <- pvclust(data, nboot = 10000, method.dist = dist, 
+                      method.hclust = clust)
+```
+
+Model-based Bayesian approach to identify clusters
+```{r}
+# Not entirely sure how this works, but should help ID number of clusters
+mv.clust <- Mclust(data)
+plot(mv.clust) # plot results
+summary(mv.clust)
+```
+
+Plotting
+```{r}
+# Initiate file for figure
+png(filename="~/GitHub/PhosTrait/figures/Cluster.png",
     width = 1200, height = 1200, res = 96*2)
-plot(pvclust.MW, main="Manhattan-Ward: 95%")
-pvrect(pvclust.MW) ## Highlight signif clusters at alpha=0.95
+
+# Make plot
+plot(pv.clust, main = paste(dist, clust, sep = " "), cex = 1.0, 
+     cex.pv = 0.75, col.pv= c("red", "black", "gray"), 
+     print.pv = TRUE, print.num = FALSE)
+
+# AU = "approximately unbiased" p-value 
+# "Clusters that are highly supported by the data will have large p values."
+# BP = "bootstrap probability"
+
+# Highlight clusters based on p-values
+pvrect(pv.clust, alpha = 0.95, type="geq") 
+
 dev.off()
 graphics.off() # shuts down open devices
 ```
 
-Manhattan-Complete
+
+Validating cluster solutions
 ```{r}
-pvclust.MC <- pvclust(gr.data[,2:19], nboot=10000, method.dist="manhattan", 
-                      method.hclust="complete")
-png(filename="~/GitHub/PhosTrait/figures/Cluster.MC.png",
-    width = 1200, height = 1200, res = 96*2)
-plot(pvclust.MC, main="Manhattan-Complete: 95%")
-pvrect(pvclust.MC) ## Highlight signif clusters at alpha=0.95
-dev.off()
-graphics.off() # shuts down open devices
-```
+# compare 2 cluster solutions
+cluster.stats(d, fit1$cluster, fit2$cluster)
 
-Manhattan-Average
-```{r}
-pvclust.MA <- pvclust(gr.data[,2:19],nboot=10000, method.dist="manhattan", 
-                      method.hclust="average")
-png(filename="~/GitHub/PhosTrait/figures/Cluster.MA.png",
-    width = 1200, height = 1200, res = 96*2)
-plot(pvclust.MA, main="Manhattan-Average: 95%")
-pvrect(pvclust.MA)## Highlight signif clusters at alpha=0.95
-dev.off()
-graphics.off() # shuts down open devices
-```
+# haven't tried this yet...
 
-Euclidean-Ward
-```{r}
-pvclust.EW <- pvclust(gr.data[,2:19], nboot=10000, method.dist="euclidean", 
-                      method.hclust="ward.D")
-png(filename="~/GitHub/PhosTrait/figures/Cluster.EW.png",
-    width = 1200, height = 1200, res = 96*2)
-plot(pvclust.EW, main="Euclidean-Ward: 95%")
-pvrect(pvclust.EW)## Highlight signif clusters at alpha=0.95
-dev.off()
-graphics.off() # shuts down open devices
-```
-
-Euclidean-Average
-```{r}
-pvclust.EA <- pvclust(gr.data[,2:19], nboot=10000, method.dist="euclidean", 
-                      method.hclust="average")
-png(filename="~/GitHub/PhosTrait/figures/Cluster.EA.png",
-    width = 1200, height = 1200, res = 96*2)
-plot(pvclust.EW, main="Euclidean-Average: 95%")
-pvrect(pvclust.EW)## Highlight signif clusters at alpha=0.95
-dev.off()
-graphics.off() # shuts down open devices
-```
-
----->>>> Stuff below here seems to be a hodge podge of stuff, including exact code 
-from Steve Cullman's multivariate course
-
-
-
-
-
-#nms for p data 13sep11 input
-
-# output : nms.frame, bayesframe, bmatrix, tmat, tframe
-
-rownames(bmatrix)<-bayesdata$repiso
-
-
-# Using levins index
-setwd("/Users/inisfree/Desktop/Final GRs")
-
-
-rawdata<-read.csv("grraw.csv")
-str(rawdata)
-colnames(rawdata)[1]<-"repiso"
-
-rawmatrix<-as.matrix(rawdata[,2:19])
-rownames(rawmatrix)<-rawdata$repiso
-head(rawmatrix)
-
-levins.index<-diversity(rawmatrix,"invsimpson")
-
-# Try kmeans clustering:
-
-
-#How to determine the number of groups?
-## If the number of clusters is not pre-determined by your experimental design or analysis goals, you can explore the data for an optimal number of groups.
-
-## Below is a function that quantifies the within group sum of squares for kmeans clustering runs with the number of clusters ranging from 2 to 15
-
-wss <- (nrow(nema[,4:84])-1)*sum(apply(nema[,4:84],2,var))
-for (i in 2:15) wss[i] <- sum(kmeans(nema[,4:84],centers=i)$withinss)
-
-wss <- (nrow(tmat))*sum(apply(tmat,2,var))
-for (i in 2:15) wss[i] <- sum(kmeans(tmat,centers=i)$withinss)
-
-## Now we plot the results in a scree plot to determine an 'optimal'number of clusters
-plot(1:15, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
-
-
-
-
-## Depending on the data, the output can vary greatly. We are basically looking for the 'elbow' of when additional clusters do not significantly reduce the sum of squares.
-## It appears that this dataset does not have discrete groupings, and a user could select anywhere from 3 to 8 clusters. (A less subjective, model-based method of selecting clusters is to use the BIC criterion in the package mclust. There are a number of caveats with this, so we won't explore this option now.)
-
-## Run a K-Means analysis with 4 clusters selected
-nema.kmeans <- kmeans(nema[,4:84], 4)
-## Here is a vector of classifications
-nema.kmeans$cluster
-
-
-## Run a K-Means analysis with 10 clusters selected
-tmat.kmeans <- kmeans(tmat, 10)
-## Here is a vector of classifications
-tmat.kmeans$cluster
-
-
-
-## Append new clustering scheme to data frame for further manipulation/ exploration. The below function simply adds the vector of clusters as a final column to the data frame (similar to the cbind() function).
-
-tmat.clust = data.frame(tmat, tmat.kmeans$cluster)
-str(tmat.clust)
-
-
-
-
-## Let's take a second to look at our sample heterogeneity (Whitaker's Beta Diversity) in our dataset.
-(ncol(tmat)/mean(specnumber(tmat))) - 1
-
-## Calculate euclidean distance
-tmat.eucl=vegdist(tmat, method='euclidean')
- 
- 
-tmat.eucl=vegdist(tmat, method='bray')
-## Run the following clustering methods
-
-
-
-## Single Linkage (Nearest Neighbor)
-cluster=hclust(tmat.eucl, method="single")
-plot(cluster, xlab="Single Linkage")
-## Complete Linkage (Farthest Neighbor)
-cluster=hclust(tmat.eucl, method="complete")
-plot(cluster, xlab="Complete Linkage")
-
-## Group Average (UPGMA)
-cluster=hclust(tmat.eucl, method="average")
-plot(cluster, xlab="UPGMA")
-## Ward's Method
-cluster=hclust(tmat.eucl, method="ward")
-plot(cluster, xlab="Ward's method")
-
-
-# These all seem to be rather similar
-
-
-
-#From class notes: ## For a cluster with AU p-value > 0.95, the hypothesis that "the cluster does not exist" is rejected with significance level 0.05
-## See http://www.is.titech.ac.jp/~shimo/prog/pvclust/ for an indepth example
-
-pvclust.scale <- pvclust(bmatrix,nboot=2000, method.dist="euclidean",method.hclust="ward")
-
-plot(pvclust.scale, main="All Data Clustered (bayes matrix)- euclidean/ward: 95%")
-pvrect(pvclust.scale)## Highlight signif clusters at alpha=0.95
-
-# This shows (GTP and GDP) & (MeCP and PhenCP) to be 99% similar, Peth/Pchol ~85%, but DNA over Peth/Pchol to be 98% (don't really understand how that works out.)
-
-
-
-## Use 10,000 iterations for pubs
-pvclust.scale <- pvclust(bmatrix,nboot=10000, method.dist="manhattan")
-
-plot(pvclust.scale, main="All Data Clustered (bayes matrix)- manhattan/ward: 95%")
-pvrect(pvclust.scale)## Highlight signif clusters at alpha=0.95
-
-# This shows (GTP/GDP)~96% & (MeCP/PhenCP) ~100% similar
-
-seplot(pvclust.scale) # All SEs below 0.01
-print(pvclust.scale, digits=5)
-
-
-
-
-pvclust.scale <- pvclust(bmatrix,nboot=2000, method.dist="euclidean",method.hclust="average")
-
-plot(pvclust.scale, main="All Data Clustered (bayes matrix)- euclidean/average: 95%")
-pvrect(pvclust.scale)## Highlight signif clusters at alpha=0.95
-
-# This shows (GTP / GDP) & (MeCP / PhenCP) to be 99% similar, Peth/Pchol ~82%, DNA over Peth/Pchol to be 88%, and somehow links these w/ MeCP/PhenCP at 96% (don't really understand how that works out.)
-
-
-#Create matrix w/ the collapsed data:
-
-collmat<-matrix(NA, nrow=16, ncol=39)
-
-rownames(tmat) #GDP and GTP are 17 & 18, MeCP=5, PhenCP=15.
-
-collmat[15,]<-apply(tmat[17:18,],2,mean)
-collmat[16,]<-apply(tmat[c(5,15),],2,mean)
-collmat[1:14,]<-tmat[c(1:4,6:14,16),]
-
-colnames(collmat)<-colnames(tmat)
-rownames(collmat)<-c(rownames(tmat)[c(1:4,6:14,16)],"CP","GXP")
-
-rownames(collmat)
-
-
-
-#nms.collapsed<-function
-#NMS w/ collapsed data matrices
-
-#from NMS ... 13Sep11.R :
-
-nms.coll.frame<-data.frame(versframe$lakelist,bayesdata$repiso,t(collmat))
-
-str(nms.coll.frame)
-
-
-
-# Run NMS
-
-library(vegan)
-
-mds.coll.data<-metaMDS(nms.coll.frame[,3:18])
-
-mds.coll.data
-
-
-mds.coll.data$points ## Isolate scores (samples scores)
-mds.coll.data$species ## P source scores (species scores)
-
-stressplot(mds.coll.data) #not so good.  ~15
-
-
-qplot(mds.coll.data$points[,1], mds.coll.data$points[,2], data=nms.coll.frame, geom="text", label=nms.coll.frame$bayesdata.repiso,size=1,color=versframe.lakelist, main="Given P data, do species differ (by lake)?")
-
-
-
-
-
-# Run NMS w/ t frame
-
-
-# This data frame uses P sources ~ sites, and isos ~ species. => Given the species abundance data, do the sites differe substantially? i.e. Given the iso growth data, do the P sources differ substantially? 
-# Use this to look for patterns by lake?
-
-str(collmat)
-
-tframe<-data.frame(collmat)
-head(tframe)
-
-
-mds.t<-metaMDS(tframe)
-
-mds.t
-
-
-qplot(mds.t$points[,1], mds.t$points[,2], data=tframe, geom="text", label=rownames(tframe),size=1, main="Given the species data, how do the P sources differ?")
-
-plot(mds.t, type="t")
-
-
-
-
-
-
-
-
-
-
-
-
-#w.levins<-function
-
-levinsframe<-data.frame(levins.index,nms.frame)
-str(levinsframe)
-
-lmat<-as.matrix(levinsframe[,1])
-rownames(lmat)<-levinsframe$bayesdata.repiso
-
-pvclust.levins <- pvclust(t(lmat),nboot=2000, method.dist="euclidean",method.hclust="average")
-
-levsort<-sort.list(levins.index,decreasing=TRUE)
-
-lscree<-rbind(levins.index[levsort])
-
-plot(1:39,lscree,type="b")
-
-#looks like maybe could say >24 = more specialized (after L1):
-
-median(lscree) #12.75309 - b/t iso 19/20
-
-
-
-
-isos<-levinsframe$bayesdata.repiso[levsort[25:39]] # this is the form of col/rown names that I want
-
-for(i in 1:length(isos)){
-specframe[i,]<-levinsframe[levinsframe$bayesdata.repiso==isos[i],]
-
-}
-
-str(specframe)
-
-
-#clust
-pvclust.scale <- pvclust(specframe[4:21],nboot=2000, method.dist="euclidean",method.hclust="ward")
-
-plot(pvclust.scale, main="Specialists' Data Clustered - euclidean/ward: 95%")
-pvrect(pvclust.scale)## Highlight signif clusters at alpha=0.95
-
-
-#NMS
-
-
-mds.data<-metaMDS(specframe[4:21])
-mds.data
-
-mds.data$points #sample scores
-mds.data$species #species scores
-
-qplot(mds.data$points[,1], mds.data$points[,2], data=specframe, geom="text", label=specframe$bayesdata.repiso,size=1,color=versframe.lakelist, main="Given Specialists' P data, do species differ (by lake)?")
-
-
-
-mds.t<-metaMDS(t(specframe[4:21]))
-
-mds.t
-
-
-qplot(mds.t$points[,1], mds.t$points[,2], data=tframe, geom="text", label=rownames(t(specframe[4:21])),size=1, main="Given the specialists' species data, how do the P sources differ?")
-
-
-
-# Which of the P sources are the specialists using?  Do they prefer one over others?
-
-#H0 - each spec specializes on random P sources 
-#Ha - all/most specs specialize on one or a certain type of P source 
-
-#- try means/medians for each P source.  Compare across P sources.
-
-specmeans<-apply(specframe[4:21],2,mean)
-specmedians<-apply(specframe[4:21],2,median)
-
-sspecmeans<-sort(specmeans, decreasing=TRUE)
-sspecmeds<-sort(specmedians, decreasing=TRUE)
-
-plot(1:length(specmeans),sspecmeans,type="b")
-plot(1:length(sspecmeds),sspecmeds,type="b")
-
-# Compare to all isos (not just specs)
-
-str(levinsframe)
-
-
-allmeans<-apply(levinsframe[4:21],2,mean)
-allmedians<-apply(levinsframe[4:21],2,median)
-
-sallmeans<-sort(allmeans, decreasing=TRUE)
-sallmeds<-sort(allmedians, decreasing=TRUE)
-
-plot(1:length(sallmeans),sallmeans,type="b", main="How many ")
-plot(1:length(sallmeds),sallmeds,type="b")
-
-
-
-
-
-
-#What about all isos -- do their prefs vary by lake?
-
-
-llmeans<-apply(levinsframe[1:18,4:21],2,mean)
-llmedians<-apply(levinsframe[1:18,4:21],2,median)
-
-wgmeans<-apply(levinsframe[19:39,4:21],2,mean)
-wgmedians<-apply(levinsframe[19:39,4:21],2,median)
-
-
-sllmeans<-sort(llmeans, decreasing=TRUE)
-sllmeds<-sort(llmedians, decreasing=TRUE)
-
-
-swgmeans<-sort(wgmeans, decreasing=TRUE)
-swgmeds<-sort(wgmedians, decreasing=TRUE)
-
-
-
-
-
-alllist<-1:length(allmeans)
-speclist<-1:length(specmeans)
-
-      #means
-qplot(alllist,sallmeans,geom="text", label=names(sallmeans), size=4, main="Which P sources do the isolates use best, on average?", xlab="Order number", ylab="Mean GR across all isos for the P source")
-
-qplot(speclist,sspecmeans,geom="text", label=names(sspecmeans), size=4, main="Which P sources do the specialists use best, on average?", xlab="Order number", ylab="Mean GR across specialists for the P source")
-
-
-       #medians
-qplot(alllist,sallmeds,geom="text", label=names(sallmeds), size=4, main="Which P sources do the isolates tend to use best?", xlab="Order number", ylab="Median GR across all isos for the P source")
-
-qplot(speclist,sspecmeds,geom="text", label=names(sspecmeds), size=4, main="Which P sources do the specialists tend to use best?", xlab="Order number", ylab="Median GR across specialists for the P source")
-
-
-
-
-#ll vs wg
-
-llist<-1:length(llmeans)
-wglist<-1:length(wgmeans)
-
-      #means
-qplot(llist,sllmeans,geom="text", label=names(sllmeans), size=4, main="Which P sources do LL isolates use best, on average?", xlab="Order number", ylab="Mean GR across LL isos for the P source")
-
-qplot(wglist,swgmeans,geom="text", label=names(swgmeans), size=4, main="Which P sources do WG isolates use best, on average?", xlab="Order number", ylab="Mean GR across WG isos for the P source")
-
-
-
-      #medians
-qplot(llist,sllmeds,geom="text", label=names(sllmeds), size=4, main="Which P sources do LL isolates tend to use best?", xlab="Order number", ylab="Median GR across LL isos for the P source")
-
-qplot(wglist,swgmeds,geom="text", label=names(swgmeds), size=4, main="Which P sources do WG isolates tend to use best?", xlab="Order number", ylab="Median GR across WG isos for the P source")
-
-
-
-#srp.llvswg<-function
-
-# Compare SRP b/t LL and WG
-
-str(nms.frame)
-
-
-var(nms.frame$SRP[1:18]) #[1] 0.04692284
-var(nms.frame$SRP[19:39]) #[1] 0.04499225
-
-t.test(nms.frame$SRP[1:18],nms.frame$SRP[19:39], var.equal=TRUE)
+# where d is a distance matrix among objects, and fit1$cluster and fit$cluster are integer vectors containing classification results from two different clusterings of the same data.
