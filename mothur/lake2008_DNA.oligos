@@ -1,0 +1,14 @@
+###USE '#' to ignore line, there were 4 reverse primers used in this run
+forward	AYTGGGYDTAAAGNG
+#reverse TACNVGGGTATCTAATCC
+#reverse TACCRGGGTHTCTAATCC
+#reverse TACCAGAGTATCTAATTC
+#reverse TACDSRGGTMTCTAATCN 
+
+###barcode	____________	'name'
+barcode	ATGCTG	Brandy_Wine_EPI_DNA
+barcode	AGAGAG	Little_Long_EPI_DNA
+barcode	AGATGC	Wintergreen_EPI_DNA
+barcode	AGCATG	Brandy_Wine_Hypo_DNA
+barcode	ATCATC	Little_Long_Hypo_DNA
+barcode	ATCTGC	Wintergreen_Hypo_DNA
