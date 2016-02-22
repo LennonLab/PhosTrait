@@ -1,0 +1,269 @@
+Mac version
+
+Using ReadLine
+
+Running 64Bit Version
+
+mothur v.1.36.1
+Last updated: 7/27/2015
+
+by
+Patrick D. Schloss
+
+Department of Microbiology & Immunology
+University of Michigan
+pschloss@umich.edu
+http://www.mothur.org
+
+When using, please cite:
+Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.
+
+Distributed under the GNU General Public License
+
+Type 'help()' for information on the commands that are available
+
+Type 'quit()' to exit program
+Interactive Mode
+
+
+mothur > sffinfo(sff=r1_reads.sff)
+Extracting info from r1_reads.sff ...
+10000
+14678
+It took 4 secs to extract 14678.
+
+Output File Names: 
+r1_reads.fasta
+r1_reads.qual
+r1_reads.flow
+
+
+mothur > sffinfo(sff=r2_reads.sff)
+Extracting info from r2_reads.sff ...
+8529
+It took 2 secs to extract 8529.
+
+Output File Names: 
+r2_reads.fasta
+r2_reads.qual
+r2_reads.flow
+
+
+mothur > 
+[ERROR]: You are missing (
+Invalid.
+
+mothur > #Once the sequences have been extracted and the fasta and quality files generated, I find that it helps to rename them.
+[ERROR]: You are missing (
+Invalid.
+
+mothur > system(cp r2_reads.fasta lake2008_DNA.fasta)
+
+
+mothur > system(cp r1_reads.fasta lake2008_cDNA.fasta)
+
+
+mothur > system(cp r2_reads.qual lake2008_DNA.qual)
+
+
+mothur > system(cp r1_reads.qual lake2008_cDNA.qual)
+
+
+mothur > 
+[ERROR]: You are missing (
+Invalid.
+
+mothur > #First Look
+[ERROR]: You are missing (
+Invalid.
+
+mothur > summary.seqs(fasta=lake2008_DNA.fasta)
+
+Using 1 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	233	233	0	3	1
+2.5%-tile:	1	237	237	0	4	214
+25%-tile:	1	242	242	0	4	2133
+Median: 	1	245	245	0	4	4265
+75%-tile:	1	245	245	0	5	6397
+97.5%-tile:	1	247	247	0	6	8316
+Maximum:	1	266	266	2	9	8529
+Mean:	1	242.975	242.975	0.0161801	4.37671
+# of Seqs:	8529
+
+Output File Names: 
+lake2008_DNA.summary
+
+It took 0 secs to summarize 8529 sequences.
+
+mothur > summary.seqs(fasta=lake2008_cDNA.fasta)
+
+Using 1 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	198	198	0	3	1
+2.5%-tile:	1	237	237	0	4	367
+25%-tile:	1	239	239	0	4	3670
+Median: 	1	245	245	0	4	7340
+75%-tile:	1	245	245	0	5	11009
+97.5%-tile:	1	247	247	0	6	14312
+Maximum:	1	259	259	2	8	14678
+Mean:	1	242.672	242.672	0.0234364	4.46587
+# of Seqs:	14678
+
+Output File Names: 
+lake2008_cDNA.summary
+
+It took 0 secs to summarize 14678 sequences.
+
+mothur > trim.seqs(fasta=lake2008_DNA.fasta, oligos=lake2008_DNA.oligos, qfile=lake2008_DNA.qual, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50)
+
+Using 1 processors.
+
+Group count: 
+Brandy_Wine_EPI_DNA	799
+Brandy_Wine_Hypo_DNA	199
+Little_Long_EPI_DNA	599
+Little_Long_Hypo_DNA	4148
+Wintergreen_EPI_DNA	384
+Wintergreen_Hypo_DNA	1612
+Total of all groups is 7741
+
+Output File Names: 
+lake2008_DNA.trim.fasta
+lake2008_DNA.scrap.fasta
+lake2008_DNA.trim.qual
+lake2008_DNA.scrap.qual
+lake2008_DNA.groups
+
+
+mothur > summary.seqs(fasta=lake2008_DNA.fasta)
+
+Using 1 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	233	233	0	3	1
+2.5%-tile:	1	237	237	0	4	214
+25%-tile:	1	242	242	0	4	2133
+Median: 	1	245	245	0	4	4265
+75%-tile:	1	245	245	0	5	6397
+97.5%-tile:	1	247	247	0	6	8316
+Maximum:	1	266	266	2	9	8529
+Mean:	1	242.975	242.975	0.0161801	4.37671
+# of Seqs:	8529
+
+Output File Names: 
+lake2008_DNA.summary
+
+It took 0 secs to summarize 8529 sequences.
+
+mothur > unique.seqs(fasta=lake2008_DNA.trim.fasta)
+7741	4253
+
+Output File Names: 
+lake2008_DNA.trim.names
+lake2008_DNA.trim.unique.fasta
+
+
+mothur > summary.seqs(fasta=lake2008_DNA.trim.unique.fasta)
+
+Using 1 processors.
+[WARNING]: This command can take a namefile and you did not provide one. The current namefile is lake2008_DNA.trim.names which seems to match lake2008_DNA.trim.unique.fasta.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	50	50	0	3	1
+2.5%-tile:	1	57	57	0	3	107
+25%-tile:	1	207	207	0	4	1064
+Median: 	1	219	219	0	4	2127
+75%-tile:	1	224	224	0	5	3190
+97.5%-tile:	1	226	226	0	6	4147
+Maximum:	1	236	236	0	6	4253
+Mean:	1	201.228	201.228	0	4.27581
+# of Seqs:	4253
+
+Output File Names: 
+lake2008_DNA.trim.unique.summary
+
+It took 0 secs to summarize 4253 sequences.
+
+mothur > summary.seqs(fasta=lake2008_DNA.trim.unique.fasta, names = lake2008_DNA.trim.names)
+names  is not a valid parameter.
+The valid parameters are: fasta, name, count, processors, seed, inputdir, and outputdir.
+
+Using 1 processors.
+[WARNING]: This command can take a namefile and you did not provide one. The current namefile is lake2008_DNA.trim.names which seems to match lake2008_DNA.trim.unique.fasta.
+[ERROR]: did not complete summary.seqs.
+
+mothur > summary.seqs(fasta=lake2008_DNA.trim.unique.fasta, nams = lake2008_DNA.trim.names)
+nams  is not a valid parameter.
+The valid parameters are: fasta, name, count, processors, seed, inputdir, and outputdir.
+
+Using 1 processors.
+[WARNING]: This command can take a namefile and you did not provide one. The current namefile is lake2008_DNA.trim.names which seems to match lake2008_DNA.trim.unique.fasta.
+[ERROR]: did not complete summary.seqs.
+
+mothur > summary.seqs(fasta=lake2008_DNA.trim.unique.fasta, name=lake2008_DNA.trim.names)
+
+Using 1 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	50	50	0	3	1
+2.5%-tile:	1	62	62	0	3	194
+25%-tile:	1	211	211	0	4	1936
+Median: 	1	221	221	0	4	3871
+75%-tile:	1	224	224	0	5	5806
+97.5%-tile:	1	226	226	0	6	7548
+Maximum:	1	236	236	0	6	7741
+Mean:	1	207.291	207.291	0	4.31404
+# of unique seqs:	4253
+total # of seqs:	7741
+
+Output File Names: 
+lake2008_DNA.trim.unique.summary
+
+It took 0 secs to summarize 7741 sequences.
+
+mothur > summary.seqs(fasta=lake2008_DNA.fasta)
+
+Using 1 processors.
+[WARNING]: This command can take a namefile and you did not provide one. The current namefile is lake2008_DNA.trim.names which seems to match lake2008_DNA.fasta.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	233	233	0	3	1
+2.5%-tile:	1	237	237	0	4	214
+25%-tile:	1	242	242	0	4	2133
+Median: 	1	245	245	0	4	4265
+75%-tile:	1	245	245	0	5	6397
+97.5%-tile:	1	247	247	0	6	8316
+Maximum:	1	266	266	2	9	8529
+Mean:	1	242.975	242.975	0.0161801	4.37671
+# of Seqs:	8529
+
+Output File Names: 
+lake2008_DNA.summary
+
+It took 0 secs to summarize 8529 sequences.
+
+mothur > summary.seqs(fasta=lake2008_DNA.trim.fasta)
+
+Using 1 processors.
+[WARNING]: This command can take a namefile and you did not provide one. The current namefile is lake2008_DNA.trim.names which seems to match lake2008_DNA.trim.fasta.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	50	50	0	3	1
+2.5%-tile:	1	62	62	0	3	194
+25%-tile:	1	211	211	0	4	1936
+Median: 	1	221	221	0	4	3871
+75%-tile:	1	224	224	0	5	5806
+97.5%-tile:	1	226	226	0	6	7548
+Maximum:	1	236	236	0	6	7741
+Mean:	1	207.291	207.291	0	4.31404
+# of Seqs:	7741
+
+Output File Names: 
+lake2008_DNA.trim.summary
+
+It took 0 secs to summarize 7741 sequences.
+
+mothur > quit()
