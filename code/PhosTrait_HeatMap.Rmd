@@ -7,7 +7,7 @@ output: pdf_document
 geometry: margin=2.54cm
 ---
 
-Generalist and specialist strategies of phosphorus acquistion by aquatic bacteria 
+Generalist and specialist strategies of phosphorus acquistion by aquatic bacteria. In this file, the goal is to make a multi-panel heatmap representing three hypothetical scenarios and one observed outcome. The first three hypothetical scenarios come from resampling our data. Scenario one is a randomized data. Scenario two resamples our data assuming that resources are used similarly among strains. Scenario three resamples our data assuming the strains grow at different rates independent of phosphorus source. The last panel in the heatmap is our observed data.  
 
 ```{r}
 rm(list=ls())
@@ -29,7 +29,7 @@ require("gridExtra")
 
 Load data (note this is raw growth rates; not phylogenetically correct)
 ```{r}
-setwd("~/GitHub/PhosTrait")
+# Raw growth rate data
 gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
 str(gr.data)
 colnames(gr.data)[1]<-"isolate"
@@ -39,6 +39,10 @@ log.gr <- log10(gr.data[,2:19]+1)
 
 # Data standardizing - divide by sum of species growth
 gr.std <- gr.data[,2:19] / (apply(gr.data[,2:19], 1, sum))
+
+# Names
+resources <- colnames(gr.data[,2:19])
+strains <- gr.data[,1]
 ```
 
 Customize Color Palette
@@ -50,62 +54,94 @@ jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
 gray.colors <- gray.colors(25, start = 0.9, end = 0.1, gamma = 1.5, alpha = 1)
 ```
 
+Clustering parameters
+```{r}
+distance <- "euclidean" 
+    # manhattan, correlation, uncentered,
+    # abscor, euclidean, bray
+
+# Identify agglomerative method
+clust <- "average"   
+    # complete = furthest neighbor; compact clusters, sensitive to outliers
+    # average = UPGMA; considered robust
+    # ward.D = popular, but makes clusters of equal size and sensitive to outliers
+    # ward.D2 = dissimilarities are squared before clustering
+    # mcquitty
+    # median = downweights outliers
+    # centroid = fairly robust
+    # single = nearest neighbor; chaining problem
+                    
+```
+
 Randomize growth rate data and make heatmap
 ```{r}
-set.seed(4672)
-rand.row <- log.gr[sample(nrow(log.gr)),]
-set.seed(9764)
-rand.row2 <-log.gr[sample(nrow(log.gr)),]
-set.seed(9863)
-rand.col <- rand.row[sample(ncol(rand.row))]
-rand.gr.std <- rand.col
-rand.heat <- heatmap.2(as.matrix(rand.gr.std), distfun = function(x) 
-          vegdist(x, method = "bray"),
-          hclustfun = function(x) hclust(x, method = "ward.D2"), 
-          col = gray.colors, trace = "none", density.info = "none")
+# Randomize growth rate data
+log.gr.mat <- as.matrix(log.gr)
+colnames(log.gr.mat) <- colnames(gr.data[,2:19])
+rownames(log.gr.mat) <- gr.data[,1]
+rand <- matrix(sample(log.gr.mat), nrow = nrow(log.gr))
+
+# Make heatmap
+rand.heat <- heatmap.2(as.matrix(rand), distfun = function(x) 
+          vegdist(x, method = distance),
+          hclustfun = function(x) hclust(x, method = clust), 
+          col = gray.colors, trace = "none", density.info = "none", 
+          labRow = strains, labCol = resources)
 ```
 
 Calculate column-wise growth rate data (mean and sd) and make heatmap
 ```{r}
+# Calculate column means
 col.means <-colMeans(log.gr)
+
+# Calculate standard deviation of columns
 col.sd <- apply(log.gr, 2, sd)
+
+# Create dataframe with mean column and sd
 col.wise <- mapply(rnorm, nrow(log.gr), col.means, col.sd/30)
-colnames(col.wise) <- colnames(log.gr)
+colnames(col.wise) <- resources
+
+# Make heatmap
 col.heat <- heatmap.2(as.matrix(col.wise), distfun = function(x) 
-          vegdist(x, method = "bray"),
-          hclustfun = function(x) hclust(x, method = "ward.D2"), 
-          col = gray.colors, trace = "none", density.info = "none")
+          vegdist(x, method = distance),
+          hclustfun = function(x) hclust(x, method = clust), 
+          col = gray.colors, trace = "none", density.info = "none",
+          labRow = strains, labCol = resources)
 ```
 
 Calculate row-wise growth rate data (mean and sd) and make heatmap
 ```{r}
+# Calculate row means
 row.means <-rowMeans(log.gr)
+
+# Calculate standard deviation of rows
 row.sd <- apply(log.gr, 1, sd)
-row.wise <- t(mapply(rnorm,ncol(log.gr), row.means, row.sd/10))
+
+# Create dataframe with mean rows and sd
+row.wise <- t(mapply(rnorm,ncol(log.gr), row.means, row.sd/30))
 colnames(row.wise) <- colnames(log.gr)
 row.heat <- heatmap.2(as.matrix(row.wise), distfun = function(x) 
-          vegdist(x, method = "bray"),
-          hclustfun = function(x) hclust(x, method = "ward.D2"), 
-          col = gray.colors, trace = "none", density.info = "none")
+          vegdist(x, method = distance),
+          hclustfun = function(x) hclust(x, method = clust), 
+          col = gray.colors, trace = "none", density.info = "none",
+          labRow = strains, labCol = resources)
 ```
 
 Actual growth rate data as heatmap
 ```{r}
-actual.heat <- heatmap.2(as.matrix(gr.std), distfun = function(x) 
-          vegdist(x, method = "bray"), hclustfun = function(x) 
-          hclust(x, method = "ward.D2"), col = gray.colors, trace = "none", 
-          density.info = "none")
+actual.heat <- heatmap.2(as.matrix(log.gr), distfun = function(x) 
+          vegdist(x, method = distance), hclustfun = function(x) 
+          hclust(x, method = clust), col = gray.colors, trace = "none", 
+          density.info = "none", labRow = strains, 
+          labCol = resources)
 ```
 
 Make multipanel heatmap
 ```{r}
-# Generation instructions for approach here: http://stackoverflow.com/questions/13081310/combining-multiple-complex-plots-as-panels-in-a-single-figure
+# Example: http://stackoverflow.com/questions/13081310/combining-multiple-complex-plots-as-panels-in-a-single-figure
 
 # Make a list of dataframes for each scenario
-heat.list <- list(rand.gr.std, col.wise, row.wise, gr.std)
-
-# Vector of names for P resources
-resources <- colnames(row.wise)
+heat.list <- list(rand, col.wise, row.wise, log.gr)
 
 # Function for running through list
 grab_grob <- function(){
@@ -114,15 +150,13 @@ grab_grob <- function(){
 }
 
 gl <- lapply(1:4, function(i){
-  heatmap.2(as.matrix(heat.list[[i]]), dendrogram = 'row',
-            Colv = FALSE, col = jet.colors, 
-            key = FALSE, keysize = 1.0, symkey = FALSE, density.info = 'none',
-            trace = 'none', colsep = 1:10,
-            sepcolor = 'white', sepwidth = 0.05,
-            scale = "none", cexRow = 1.5, cexCol = 1.5,
-            labCol = resources,                 
-            hclustfun = function(c){hclust(c, method='mcquitty')},
-            lmat = rbind( c(0, 3), c(2,1), c(0,4) ), lhei = c(0.25, 4, 0.25 ),                 
+  heatmap.2(as.matrix(heat.list[[i]]), distfun = function(x) 
+          vegdist(x, method = distance), hclustfun = function(x) 
+          hclust(x, method = clust), col = gray.colors, trace = "none", 
+          density.info = "none", labRow = strains, 
+          labCol = resources, key = FALSE, keysize = 1.0, symkey = FALSE, 
+          scale = "none", cexRow = 0.75, cexCol = 0.75,              
+          lmat = rbind( c(0, 3), c(2,1), c(0,4) ), lhei = c(0.25, 4, 0.25 ),                 
   )
   grab_grob()
 })
