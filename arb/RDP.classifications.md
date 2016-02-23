@@ -1,0 +1,84 @@
+Classifier: RDP Naive Bayesian rRNA Classifier Version 2.10, October 2014
+Taxonomical Hierarchy: RDP 16S rRNA training set 14
+Query File: p.isolates.2.fasta
+Submit Date: Mon Feb 22 15:11:07 EST 2016
+Confidence threshold (for classification to Root ONLY): 80%
+Symbol +/- indicates predicted sequence orientation
+
+**LL9**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Nocardioidaceae;100%;Aeromicrobium;100%
+
+**WG14**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Aeromonadales;100%;Aeromonadaceae;100%;Aeromonas;100%
+
+**WG28**;+;Bacteria;100%;Firmicutes;100%;Bacilli;100%;Bacillales;100%;Bacillaceae 1;100%;Bacillus;100%
+
+**LL24**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Caulobacterales;100%;Caulobacteraceae;100%;Brevundimonas;100%
+
+**LL41A**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Caulobacterales;100%;Caulobacteraceae;100%;Brevundimonas;100%
+
+**WG23A**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Caulobacterales;100%;Caulobacteraceae;100%;Brevundimonas;100%
+
+**LL5**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Caulobacterales;100%;Caulobacteraceae;100%;Brevundimonas;100%
+
+**WG58A**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Caulobacterales;100%;Caulobacteraceae;100%;Brevundimonas;100%
+
+**LLX12A**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Dietziaceae;100%;Dietzia;100%
+
+**WG21**;+;Bacteria;100%;"Bacteroidetes";100%;Flavobacteriia;100%;"Flavobacteriales";100%;Flavobacteriaceae;100%;Flavobacterium;100%
+
+**WG43**;+;Bacteria;100%;"Bacteroidetes";100%;Flavobacteriia;100%;"Flavobacteriales";100%;Flavobacteriaceae;100%;Flavobacterium;100%
+
+**WG481**;+;Bacteria;100%;"Bacteroidetes";100%;Flavobacteriia;100%;"Flavobacteriales";100%;Flavobacteriaceae;100%;Flavobacterium;100%
+
+**WG74**;+;Bacteria;100%;"Bacteroidetes";100%;Flavobacteriia;100%;"Flavobacteriales";100%;Flavobacteriaceae;100%;Flavobacterium;100%
+
+**LL18**;+;Bacteria;100%;"Bacteroidetes";100%;Flavobacteriia;100%;"Flavobacteriales";100%;Flavobacteriaceae;100%;Flavobacterium;100%
+
+**WG22**;+;Bacteria;100%;"Bacteroidetes";100%;Flavobacteriia;100%;"Flavobacteriales";100%;Flavobacteriaceae;100%;Flavobacterium;100%
+
+**LL1**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Micrococcaceae;100%;Kocuria;100%
+
+**LL37**;+;Bacteria;100%;"Proteobacteria";100%;Betaproteobacteria;100%;Burkholderiales;100%;Comamonadaceae;82%;Roseateles;76%
+
+**LL12**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**LL8**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**WG59**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**WG58B**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**LL41B**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**WG34B**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**WG40**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**WG44**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**WG49**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Pseudomonadales;100%;Pseudomonadaceae;100%;Pseudomonas;100%
+
+**LL14**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Chromatiales;100%;Chromatiaceae;100%;Rheinheimera;100%
+
+**LLX3**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Nocardiaceae;100%;Rhodococcus;100%
+
+**WG36**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;"Enterobacteriales";100%;Enterobacteriaceae;100%;Serratia;93%
+
+**WG27**;+;Bacteria;100%;"Proteobacteria";100%;Gammaproteobacteria;100%;Alteromonadales;100%;Shewanellaceae;100%;Shewanella;100%
+
+**WG16**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Sphingomonadales;100%;Sphingomonadaceae;100%;Sphingobium;82%
+
+**LL4**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Sphingomonadales;100%;Sphingomonadaceae;100%;Sphingobium;61%
+
+**WG56**;+;Bacteria;100%;"Proteobacteria";100%;Alphaproteobacteria;100%;Sphingomonadales;100%;Sphingomonadaceae;100%;Sphingomonas;100%
+
+**LL13**;+;Bacteria;100%;"Proteobacteria";100%;Betaproteobacteria;100%;Neisseriales;100%;Neisseriaceae;100%;Vogesella;100%
+
+**LL43F**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Nocardiaceae;100%;Williamsia;100%
+
+**LL46**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Nocardioidaceae;100%;Aeromicrobium;100%
+
+**WG26**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Nocardiaceae;100%;Rhodococcus;99%
+
+**WG42**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Mycobacteriaceae;100%;Mycobacterium;100%
+
+**LLX17**;+;Bacteria;100%;"Actinobacteria";100%;Actinobacteria;100%;Actinomycetales;100%;Nocardioidaceae;100%;Aeromicrobium;100%
