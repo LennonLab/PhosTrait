@@ -27,21 +27,18 @@ require("ape")
 
 Load data
 ```{r}
-gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
+gr.data <- read.csv("data/grraw.csv", sep=",", header = TRUE, row.names = 1)
 str(gr.data)
-colnames(gr.data)[1]<-"isolate"
 
 # Standadize Growth Rates Across Strains
-gr.std <- gr.data[,2:19] / (apply(gr.data[,2:19], 1, sum))
+gr.std <- gr.data / (apply(gr.data, 1, sum))
 
 # Calculate Max Growth Rate
-umax <- as.matrix((apply(gr.data[2:19], 1, max))) 
-rownames(umax) <- gr.data[,1]
+umax <- as.matrix((apply(gr.data, 1, max))) 
 ```
 
-Niche breadth
+Niche breadth (Levins 1968)
 ```{r}
-# Niche breadth function from Levins (1968)
 levins <- function(p_xi = ""){
   p = 0
   for (i in p_xi){
@@ -55,8 +52,8 @@ levins <- function(p_xi = ""){
 nb <- as.matrix(levins(gr.std))
 
 # Add Row & Column Names to Niche Breadth Matrix
-rownames(nb) <- gr.data[,1]
-colnames(nb) <- c("NB")
+rownames(nb) <- rownames(gr.data)
+colnames(nb) <- c("nb")
 ```  
 
 Build a `phylo` file
@@ -99,14 +96,21 @@ add.scale.bar(cex = 0.7)
 p.tree <- drop.tip(nj.rooted, "Methanosarcina")
 ```
 
-Phylogenetic regression
-# something about y[taxa] and x[taxa] that's not working; giving NA
+Phylogenetic regression (simple w/o dummy variable)
 ```{r}
 taxa <- sort(p.tree$tip.label)
-x <- t(umax)
-y <- t(nb)
-dat <- data.frame(trait = y[taxa], pred = x[taxa])
-fit = phylolm(trait ~ pred, data = dat, phy = p.tree, model = "lambda")
+dat <- data.frame(umax, nb)
+fit <- phylolm(umax ~ nb, data = dat, phy = p.tree, model = "lambda")
+summary(fit)
+```
+
+Phylogenetic multiple regression
+```{r}
+lake <- ifelse(grepl("WG",row.names(gr.data)),'WG', 'LL') # make an empty vector for lake id
+tradeoff <- data.frame(nb, umax, lake) # make new data frame
+D <- (lake == "LL") * 1
+fit <- phylolm(log10(tradeoff$umax) ~ tradeoff$nb + D + tradeoff$nb * D, data = tradeoff, 
+        phy = p.tree, model = "lambda")
 summary(fit)
 ```
 
