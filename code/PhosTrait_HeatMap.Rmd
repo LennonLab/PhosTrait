@@ -27,7 +27,7 @@ require("gplots")
 require("gridExtra")
 ```
 
-Load data (note this is raw growth rates; not phylogenetically correct)
+Load data (note this is raw growth rates)
 ```{r}
 # Raw growth rate data
 gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
@@ -52,6 +52,8 @@ jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
                                  "#7F0000"))
 
 gray.colors <- gray.colors(25, start = 0.9, end = 0.1, gamma = 1.5, alpha = 1)
+
+yellow.red.colors <- colorRampPalette(c("yellow","orange", "red"))
 ```
 
 Clustering parameters
@@ -75,17 +77,32 @@ clust <- "average"
 
 Randomize growth rate data and make heatmap
 ```{r}
-# Randomize growth rate data
+# Randomize growth rate data -- log transformed
 log.gr.mat <- as.matrix(log.gr)
 colnames(log.gr.mat) <- colnames(gr.data[,2:19])
 rownames(log.gr.mat) <- gr.data[,1]
 rand <- matrix(sample(log.gr.mat), nrow = nrow(log.gr))
 
+# # Randomize growth rate data -- non-transformed
+# gr.mat <- as.matrix(gr.data[,2:19])
+# colnames(gr.mat) <- colnames(gr.data[,2:19])
+# rownames(gr.mat) <- gr.data[,1]
+# rand <- matrix(sample(gr.mat), nrow = nrow(gr.data))
+
+# Randomize growth rate data -- standardized, non-transformed
+# This creates nice visual when randomizing by rows and colums, and also when randomizing by column
+# But of course, when radnomizing by row, the standardization has already effectively elminated strain variation
+# This results in a random-like matrix. 
+# gr.mat <- as.matrix(gr.std)
+# colnames(gr.mat) <- colnames(gr.data[,2:19])
+# rownames(gr.mat) <- gr.data[,1]
+# rand <- matrix(sample(gr.mat), nrow = nrow(gr.data))
+
 # Make heatmap
 rand.heat <- heatmap.2(as.matrix(rand), distfun = function(x) 
           vegdist(x, method = distance),
           hclustfun = function(x) hclust(x, method = clust), 
-          col = gray.colors, trace = "none", density.info = "none", 
+          col = yellow.red.colors, trace = "none", density.info = "none", 
           labRow = strains, labCol = resources)
 ```
 
@@ -105,7 +122,7 @@ colnames(col.wise) <- resources
 col.heat <- heatmap.2(as.matrix(col.wise), distfun = function(x) 
           vegdist(x, method = distance),
           hclustfun = function(x) hclust(x, method = clust), 
-          col = gray.colors, trace = "none", density.info = "none",
+          col = yellow.red.colors, trace = "none", density.info = "none",
           labRow = strains, labCol = resources)
 ```
 
@@ -123,7 +140,7 @@ colnames(row.wise) <- colnames(log.gr)
 row.heat <- heatmap.2(as.matrix(row.wise), distfun = function(x) 
           vegdist(x, method = distance),
           hclustfun = function(x) hclust(x, method = clust), 
-          col = gray.colors, trace = "none", density.info = "none",
+          col = yellow.red.colors, trace = "none", density.info = "none",
           labRow = strains, labCol = resources)
 ```
 
@@ -131,7 +148,7 @@ Actual growth rate data as heatmap
 ```{r}
 actual.heat <- heatmap.2(as.matrix(log.gr), distfun = function(x) 
           vegdist(x, method = distance), hclustfun = function(x) 
-          hclust(x, method = clust), col = gray.colors, trace = "none", 
+          hclust(x, method = clust), col = yellow.red.colors, trace = "none", 
           density.info = "none", labRow = strains, 
           labCol = resources)
 ```
