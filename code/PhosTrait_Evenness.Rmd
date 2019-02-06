@@ -1,0 +1,78 @@
+---
+title: "Phosphorus Traits"
+author: "Jay T. Lennon, Mario Muscarella, Kali Bird"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+  - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+```{r}
+rm(list=ls())
+getwd()
+setwd("~/GitHub/PhosTrait")
+```
+
+Load package for writing figures
+```{r}
+require("png")
+require("vegan")
+```
+
+Load data (note this is raw growth rates)
+```{r}
+# Raw growth rate data
+gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE) # column = resources
+colnames(gr.data)[1]<-"isolate"
+
+# Data standardizing: 0 - 1
+norm.g <- function(x) (x-min(x))/(max(x)-min(x))
+norm.g.data <- apply(gr.data[,2:19], 1, norm.g)
+colnames(norm.g.data)<-gr.data[,1]
+
+# Ordering 
+#row.names(norm.g.data) <- c()
+norm.sort <- apply(norm.g.data, 2, sort, decreasing=T)
+
+# Ranks
+ranks <- as.vector(seq(1, dim(norm.sort)[1]))
+
+# Little Long and Wintergreen data
+LL <- norm.sort[,1:18]
+WG <- norm.sort[,19:39]
+plot.new()
+matplot(ranks,LL, type = "l", lty = 2, lwd = 2, col = "blue", xlab = "Rank phosphorus preference",
+        ylab = "Scaled growth rate", xlim = c(0,20), ylim = c(0, 1), las = 1)
+matlines(ranks,WG, type = "l", lty = 3, lwd = 1.5, col = "red")
+
+# Quantify evenness
+evar <- function(x){
+  x <- as.vector(x[x > 0])
+  1 - (2/pi)*atan(var(log(x)))
+}
+
+evar.LL <- apply(LL,2,evar)
+evar.WG <- apply(WG,2,evar)
+t.test(evar.LL, evar.WG)
+wilcox.test(evar.LL,evar.WG)
+
+S.obs <- function(x = ""){
+  rowSums(x > 0) * 1
+  }
+
+SimpE <- function(x = ""){
+  S <- S.obs(x) 
+  x = as.data.frame(x)
+  D <- diversity(x, "inv")
+  E <- (D)/S 
+  return(E)
+  }
+
+simpe.LL <- SimpE(LL) 
+simpe.LL <- simpe.LL[is.finite(simpe.LL)]
+simpe.WG <- SimpE(WG)
+simpe.WG <- simpe.WG[is.finite(simpe.WG)]
+t.test(simpe.LL, simpe.WG)
+wilcox.test(simpe.LL,simpe.WG)
+```
