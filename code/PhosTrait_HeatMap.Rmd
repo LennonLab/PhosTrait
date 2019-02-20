@@ -47,11 +47,11 @@ strains <- gr.data[,1]
 
 Customize Color Palette
 ```{r}
-jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", 
+#jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", 
                                  "#7FFF7F", "yellow", "#FF7F00", "red", 
                                  "#7F0000"))
 
-gray.colors <- gray.colors(25, start = 0.9, end = 0.1, gamma = 1.5, alpha = 1)
+#gray.colors <- gray.colors(25, start = 0.9, end = 0.1, gamma = 1.5, alpha = 1)
 
 yellow.red.colors <- colorRampPalette(c("yellow","orange", "red"))
 ```
@@ -169,7 +169,7 @@ grab_grob <- function(){
 gl <- lapply(1:4, function(i){
   heatmap.2(as.matrix(heat.list[[i]]), distfun = function(x) 
           vegdist(x, method = distance), hclustfun = function(x) 
-          hclust(x, method = clust), col = gray.colors, trace = "none", 
+          hclust(x, method = clust), col = yellow.red.colors, trace = "none", 
           density.info = "none", labRow = strains, 
           labCol = resources, key = FALSE, keysize = 1.0, symkey = FALSE, 
           scale = "none", cexRow = 0.75, cexCol = 0.75,              
