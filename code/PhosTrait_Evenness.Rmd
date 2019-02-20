@@ -8,19 +8,46 @@ output: pdf_document
 geometry: margin=2.54cm
 ---
 
+# Set working directory
 ```{r}
 rm(list=ls())
 getwd()
 setwd("~/GitHub/PhosTrait")
 ```
 
-Load package for writing figures
+# Load package
 ```{r}
 require("png")
 require("vegan")
+require("phylolm")
+require("seqinr")
+require("ape")
+require("phytools")
 ```
 
-Load data (note this is raw growth rates)
+# Create `phylo` tree file
+```{r}
+# Load Maximum Likielihood Tree File
+ml.bootstrap <- read.tree("./data/RAxML_bestTree.LTDE.ML")
+
+# Identify Outgroup Sequence
+outgroup <- match("Methanosarcina", ml.bootstrap$tip.label)
+
+# Root the Tree {ape}
+ml.rooted <- root(ml.bootstrap, outgroup, resolve.root = TRUE)
+
+# Plot the Rooted Tree{ape}
+par(mar = c(1,1,2,1) + 0.1)
+plot.phylo(ml.rooted, main = "ML", "phylogram", 
+           use.edge.length = FALSE, direction = "right", cex = 0.6, 
+           label.offset = 1)
+add.scale.bar(cex = 0.7)
+
+# Keep Rooted but Drop Outgroup Branch
+p.tree <- drop.tip(ml.rooted, "Methanosarcina")
+```
+
+# Load growth data
 ```{r}
 # Raw growth rate data
 gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE) # column = resources
@@ -32,31 +59,36 @@ norm.g.data <- apply(gr.data[,2:19], 1, norm.g)
 colnames(norm.g.data)<-gr.data[,1]
 
 # Ordering 
-#row.names(norm.g.data) <- c()
 norm.sort <- apply(norm.g.data, 2, sort, decreasing=T)
 
 # Ranks
 ranks <- as.vector(seq(1, dim(norm.sort)[1]))
 
-# Little Long and Wintergreen data
+# Make Plot of Little Long and Wintergreen Data
 LL <- norm.sort[,1:18]
 WG <- norm.sort[,19:39]
 plot.new()
 matplot(ranks,LL, type = "l", lty = 2, lwd = 2, col = "blue", xlab = "Rank phosphorus preference",
         ylab = "Scaled growth rate", xlim = c(0,20), ylim = c(0, 1), las = 1)
 matlines(ranks,WG, type = "l", lty = 3, lwd = 1.5, col = "red")
+```
 
 # Quantify evenness
+```{r}
+# Create Evar function
 evar <- function(x){
   x <- as.vector(x[x > 0])
   1 - (2/pi)*atan(var(log(x)))
 }
 
+# Test whether Evar is different between lakes
+# No phylo correction
 evar.LL <- apply(LL,2,evar)
 evar.WG <- apply(WG,2,evar)
 t.test(evar.LL, evar.WG)
 wilcox.test(evar.LL,evar.WG)
 
+# Create Simpson's function
 S.obs <- function(x = ""){
   rowSums(x > 0) * 1
   }
@@ -69,10 +101,25 @@ SimpE <- function(x = ""){
   return(E)
   }
 
+# Test whether Simpson's is different between lakes
 simpe.LL <- SimpE(LL) 
 simpe.LL <- simpe.LL[is.finite(simpe.LL)]
 simpe.WG <- SimpE(WG)
 simpe.WG <- simpe.WG[is.finite(simpe.WG)]
 t.test(simpe.LL, simpe.WG)
 wilcox.test(simpe.LL,simpe.WG)
+```
+
+# Phylogenetic ANOVA
+```{r}
+# Make Evar data
+evar.data <-c(evar.LL,evar.WG)
+
+# Code by lake
+evar.lake <-as.data.frame(c(rep("LL", 18), rep("WG",21)))
+colnames(evar.lake) <- "lake"
+evar.data <- data.frame(evar.lake, evar.data)
+
+# Run PhyloANOVA
+phylANOVA(p.tree, evar.data$evar.lake, evar.data$evar.data, nsim=1000)
 ```

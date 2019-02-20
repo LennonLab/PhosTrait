@@ -8,14 +8,14 @@ geometry: margin=2.54cm
 ---
 
 Generalist and specialist strategies of phosphorus acquistion by aquatic bacteria 
-
+# Set working directory
 ```{r}
 rm(list=ls())
 getwd()
 setwd("~/GitHub/PhosTrait")
 ```
 
-Load package for writing figures
+# Load packages
 ```{r}
 require("png")
 require("vegan")
@@ -25,7 +25,7 @@ require("seqinr")
 require("ape")
 ```
 
-Load data
+# Load data
 ```{r}
 gr.data <- read.csv("data/grraw.csv", sep=",", header = TRUE, row.names = 1)
 str(gr.data)
@@ -37,7 +37,7 @@ gr.std <- gr.data / (apply(gr.data, 1, sum))
 umax <- as.matrix((apply(gr.data, 1, max))) 
 ```
 
-Niche breadth (Levins 1968)
+# Niche breadth (Levins 1968)
 ```{r}
 levins <- function(p_xi = ""){
   p = 0
@@ -56,47 +56,29 @@ rownames(nb) <- rownames(gr.data)
 colnames(nb) <- c("nb")
 ```  
 
-Build a `phylo` file
+# Build a `phylo` file
 ```{r}
-# Identify input and output files to perform alignment in the `muscle` package
-muscle::muscle(seqs="./data/p.isolates.fasta", out = "./data/p.isolates.afa") 
-
-# Read Alignment File {seqinr}
-read.aln <- read.alignment(file = "./data/p.isolates.afa", format = "fasta")  
-
-# Convert Alignment File to DNAbin Object {ape}
-p.DNAbin <- as.DNAbin(read.aln) 
-
-# Identify Base Pair Region of 16S rRNA Gene to Visuzlize
-window <- p.DNAbin[, 100:500] 
-
-# Command to Visusalize Sequence Alignment {ape}
-image.DNAbin(window, cex.lab = 0.50) 
-
-# Create Distance Matrix with "F84" Model {ape}
-seq.dist.84 <- dist.dna(p.DNAbin, model = "F84", pairwise.deletion = FALSE)
-
-# Neighbor Joining Algorithm to Construct Tree, a 'phylo' Object {ape}
-nj.tree <- bionj(seq.dist.84)
+# Load Maximum Likielihood Tree File
+ml.bootstrap <- read.tree("./data/RAxML_bestTree.LTDE.ML")
 
 # Identify Outgroup Sequence
-outgroup <- match("Methanosarcina", nj.tree$tip.label)
+outgroup <- match("Methanosarcina", ml.bootstrap$tip.label)
 
 # Root the Tree {ape}
-nj.rooted <- root(nj.tree, outgroup, resolve.root = TRUE)
+ml.rooted <- root(ml.bootstrap, outgroup, resolve.root = TRUE)
 
 # Plot the Rooted Tree{ape}
 par(mar = c(1,1,2,1) + 0.1)
-plot.phylo(nj.rooted, main = "Neigbor Joining Tree", "phylogram", 
+plot.phylo(ml.rooted, main = "ML", "phylogram", 
            use.edge.length = FALSE, direction = "right", cex = 0.6, 
            label.offset = 1)
 add.scale.bar(cex = 0.7)
 
 # Keep Rooted but Drop Outgroup Branch
-p.tree <- drop.tip(nj.rooted, "Methanosarcina")
+p.tree <- drop.tip(ml.rooted, "Methanosarcina")
 ```
 
-Phylogenetic regression (simple w/o dummy variable)
+# Phylogenetic regression (simple w/o dummy variable)
 ```{r}
 taxa <- sort(p.tree$tip.label)
 dat <- data.frame(umax, nb)
@@ -104,7 +86,7 @@ fit <- phylolm(umax ~ nb, data = dat, phy = p.tree, model = "lambda")
 summary(fit)
 ```
 
-Phylogenetic multiple regression
+# Phylogenetic multiple regression
 ```{r}
 lake <- ifelse(grepl("WG",row.names(gr.data)),'WG', 'LL') # make an empty vector for lake id
 tradeoff <- data.frame(nb, umax, lake) # make new data frame
@@ -114,7 +96,7 @@ fit <- phylolm(log10(tradeoff$umax) ~ tradeoff$nb + D + tradeoff$nb * D, data = 
 summary(fit)
 ```
 
-Plot trade-off with phylo-corrected parameters
+# Plot trade-off with phylo-corrected parameters
 ```{r}
 # Subset umax data to plot
   LL.nb <- subset(nb, lake == "LL")
