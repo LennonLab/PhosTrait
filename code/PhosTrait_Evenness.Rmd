@@ -120,6 +120,8 @@ evar.lake <-as.data.frame(c(rep("LL", 18), rep("WG",21)))
 colnames(evar.lake) <- "lake"
 evar.data <- data.frame(evar.lake, evar.data)
 
+evar.data.2 <- evar.data[p.tree$tip.label, ]
+p.tree$tip.label == row.names(evar.data.2)
 # Run PhyloANOVA
-phylANOVA(p.tree, evar.data$evar.lake, evar.data$evar.data, nsim=1000)
+phylANOVA(p.tree, evar.data.2$lake, evar.data.2$evar.data, nsim=1000)
 ```
