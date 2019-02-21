@@ -18,6 +18,7 @@ setwd("~/GitHub/PhosTrait")
 # Load packages
 ```{r}
 require("png")
+require("grid")
 require("vegan")
 require("phylolm")
 require("muscle")
@@ -35,6 +36,15 @@ gr.std <- gr.data / (apply(gr.data, 1, sum))
 
 # Calculate Max Growth Rate
 umax <- as.matrix((apply(gr.data, 1, max))) 
+
+umax2 <- as.matrix((apply(gr.std, 1, max))) 
+srp <- gr.data$SRP
+
+round(apply(gr.std, 2, max), 4)
+round(apply(gr.std, 2, min), 4)
+
+plot(log10(umax) ~ log10(srp))
+abline(0, 1)
 ```
 
 # Niche breadth (Levins 1968)
@@ -81,19 +91,24 @@ p.tree <- drop.tip(ml.rooted, "Methanosarcina")
 # Phylogenetic regression (simple w/o dummy variable)
 ```{r}
 taxa <- sort(p.tree$tip.label)
-dat <- data.frame(umax, nb)
-fit <- phylolm(umax ~ nb, data = dat, phy = p.tree, model = "lambda")
+dat <- data.frame(umax, nb, srp)
+fit <- phylolm(log10(umax) ~ nb, data = dat, phy = p.tree, model = "lambda")
+summary(fit)
+
+fit <- phylolm(log10(srp) ~ nb, data = dat, phy = p.tree, model = "lambda")
 summary(fit)
 ```
 
 # Phylogenetic multiple regression
 ```{r}
 lake <- ifelse(grepl("WG",row.names(gr.data)),'WG', 'LL') # make an empty vector for lake id
-tradeoff <- data.frame(nb, umax, lake) # make new data frame
+tradeoff <- data.frame(nb, umax, lake, srp) # make new data frame
 D <- (lake == "LL") * 1
+
 fit <- phylolm(log10(tradeoff$umax) ~ tradeoff$nb + D + tradeoff$nb * D, data = tradeoff, 
         phy = p.tree, model = "lambda")
 summary(fit)
+
 ```
 
 # Plot trade-off with phylo-corrected parameters
@@ -145,5 +160,29 @@ legend("topleft", legend = c("LL","WG"), pch = c(1, 16), cex = 1,
 
 dev.off()
 graphics.off() # shuts down open devices
+```
+
+```{r fig.width=4, fig.height=4,echo=FALSE}
+img <- readPNG("./figures/Tradeoff.png")
+grid.raster(img)
+```
+
+```{r}
+fit <- phylolm(log10(umax) ~ nb*D, data = tradeoff, 
+        phy = p.tree, model = "lambda")
+summary(fit)
+
+fit <- phylolm(log10(umax) ~ nb, data = tradeoff[tradeoff$lake == "LL", ], 
+               phy = drop.tip(p.tree, row.names(tradeoff)[which(tradeoff$lake != "LL")]), 
+               model = "lambda")
+summary(fit)
+
+fit <- phylolm(log10(umax) ~ nb, data = tradeoff[tradeoff$lake == "WG", ], 
+               phy = drop.tip(p.tree, row.names(tradeoff)[which(tradeoff$lake != "WG")]), 
+               model = "lambda")
+summary(fit)
+
+
+
 ```
 
