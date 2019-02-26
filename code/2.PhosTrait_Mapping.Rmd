@@ -1,0 +1,123 @@
+title: "Phosphorus Traits - Mapping Traits"
+author: "Jay T. Lennon, Mario Muscarella, Kali Bird"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+  - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+Generalist and specialist strategies of phosphorus acquistion by aquatic bacteria 
+
+# Set working directory
+```{r}
+rm(list=ls())
+getwd()
+setwd("~/GitHub/PhosTrait")
+```
+
+# Load packages
+```{r}
+tidy.opts=list(width.cutoff=60)} 
+package.list <- c('ape', 'seqinr', 'muscle', 'phylolm', 'vegan', 'grid', 'png', 
+      'phylobase', 'adephylo', 'geiger', 'picante', 'stats', 'RColorBrewer', 
+      'caper', 'phylolm', 'pmc', 'ggplot2', 'tidyr', 'dplyr', 'phangorn', 'pander') 
+for (package in package.list) {
+  if (!require(package, character.only=TRUE, quietly=TRUE)) {
+    install.packages(package)
+    library(package, character.only=TRUE)
+  }
+}
+```
+
+# Load growth rate data
+```{r}
+gr.data <- read.csv("data/grraw.csv", sep=",", header = TRUE, row.names = 1)
+str(gr.data)
+
+# Standadize Growth Rates Across Strains
+gr.std <- gr.data / (apply(gr.data, 1, sum))
+
+# Standadize Growth Rates Across Strains
+p.growth.std <- gr.data / (apply(gr.data, 1, sum))
+
+# Calculate Max Growth Rate
+umax <- as.matrix((apply(gr.data, 1, max))) 
+round(apply(gr.std, 2, max), 4)
+round(apply(gr.std, 2, min), 4)
+```
+
+# Calculate niche breadth (Levins 1968)
+```{r}
+levins <- function(p_xi = ""){
+  p = 0
+  for (i in p_xi){
+    p = p + i^2
+    }
+  nb = 1 / (length(p_xi) * p)
+  return(nb)
+  }
+
+# Calculate niche breadth for Each Isolate
+nb <- as.matrix(levins(gr.std))
+
+# Add Row & Column Names to Niche Breadth Matrix
+rownames(nb) <- rownames(gr.data)
+colnames(nb) <- c("nb")
+```  
+
+# Read in alignment and visualize
+```{r}
+# Read Alignment File {seqinr}
+read.aln <- read.alignment(file = "./data/p.isolate.afa", format = "fasta")  
+
+# Convert Alignment File to DNAbin Object {ape}
+p.DNAbin <- as.DNAbin(read.aln) 
+
+# Identify Base Pair Region of 16S rRNA Gene to Visuzlize
+window <- p.DNAbin[,0:900] 
+
+# Command to Visusalize Sequence Alignment {ape}
+image.DNAbin(window, cex.lab = 0.50) 
+
+# Optional Code Adds Grid to Help Visualize Rows of Sequences 
+grid(nrow(window), col = "lightgrey") 
+```
+
+# Build Maximum Likelihood tree
+```{r}
+# Keep Rooted but Drop Outgroup Branch
+ml.bootstrap.out <- read.tree("./data/ml_tree/RAxML_bipartitions.T1")
+ml.bootstrap <- drop.tip(ml.bootstrap.out, "Methanosarcina")
+par(mar = c(1,1,2,1) + 0.1)
+plot.phylo(ml.bootstrap, type = "phylogram", direction = "right", show.tip.label=TRUE,
+           use.edge.length = FALSE, cex = 0.6, label.offset = 1, 
+           main = "Maximum Likelihood with Support Values")
+add.scale.bar(cex = 0.7)
+nodelabels(ml.bootstrap$node.label, font = 2, bg = "white", frame = "r", cex = 0.5)
+```
+
+# Add P traits to Maximum Likelihood tree
+```{r}
+# Define Color Palette
+mypalette <- colorRampPalette(brewer.pal(9, "YlOrRd"))
+
+# Map Phosphorus Traits {adephylo}
+par(mar=c(1,1,1,1) + 0.1)
+x <- phylo4d(ml.bootstrap, p.growth.std)
+table.phylo4d(x, treetype = "phylo", symbol = "colors", show.node = TRUE, 
+              cex.label = 0.5, scale = FALSE, use.edge.length = FALSE, 
+              edge.color = "black", edge.width = 2, box = FALSE, 
+              col=mypalette(25), pch = 15, cex.symbol = 1.25, 
+              ratio.tree = 0.5, cex.legend = 1.5, center = FALSE)   
+
+# Niche Breadth
+par(mar=c(1,5,1,5) + 0.1)
+x.nb <- phylo4d(ml.bootstrap, nb)
+table.phylo4d(x.nb, treetype = "phylo", symbol = "colors", show.node = TRUE, 
+              cex.label = 0.5, scale = FALSE, use.edge.length = FALSE, 
+              edge.color = "black", edge.width = 2, box = FALSE, 
+              col=mypalette(25), pch = 15, cex.symbol = 1.25, 
+              var.label=("       NB"),
+              ratio.tree = 0.90, cex.legend = 1.5, center = FALSE)
+```
