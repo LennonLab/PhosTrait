@@ -17,13 +17,16 @@ setwd("~/GitHub/PhosTrait")
 
 # Load packages
 ```{r}
-require("png")
-require("grid")
-require("vegan")
-require("phylolm")
-require("muscle")
-require("seqinr")
-require("ape")
+tidy.opts=list(width.cutoff=60)} 
+package.list <- c('ape', 'seqinr', 'muscle', 'phylolm', 'vegan', 'grid', 'png', 
+      'phylobase', 'adephylo', 'geiger', 'picante', 'stats', 'RColorBrewer', 
+      'caper', 'phylolm', 'pmc', 'ggplot2', 'tidyr', 'dplyr', 'phangorn', 'pander') 
+for (package in package.list) {
+  if (!require(package, character.only=TRUE, quietly=TRUE)) {
+    install.packages(package)
+    library(package, character.only=TRUE)
+  }
+}
 ```
 
 # Load data
@@ -36,15 +39,8 @@ gr.std <- gr.data / (apply(gr.data, 1, sum))
 
 # Calculate Max Growth Rate
 umax <- as.matrix((apply(gr.data, 1, max))) 
-
-umax2 <- as.matrix((apply(gr.std, 1, max))) 
-srp <- gr.data$SRP
-
 round(apply(gr.std, 2, max), 4)
 round(apply(gr.std, 2, min), 4)
-
-plot(log10(umax) ~ log10(srp))
-abline(0, 1)
 ```
 
 # Niche breadth (Levins 1968)
@@ -66,49 +62,35 @@ rownames(nb) <- rownames(gr.data)
 colnames(nb) <- c("nb")
 ```  
 
-# Build a `phylo` file
+# Load Maximum Likelihood tree
 ```{r}
-# Load Maximum Likielihood Tree File
-ml.bootstrap <- read.tree("./data/RAxML_bestTree.LTDE.ML")
-
-# Identify Outgroup Sequence
-outgroup <- match("Methanosarcina", ml.bootstrap$tip.label)
-
-# Root the Tree {ape}
-ml.rooted <- root(ml.bootstrap, outgroup, resolve.root = TRUE)
-
-# Plot the Rooted Tree{ape}
-par(mar = c(1,1,2,1) + 0.1)
-plot.phylo(ml.rooted, main = "ML", "phylogram", 
-           use.edge.length = FALSE, direction = "right", cex = 0.6, 
-           label.offset = 1)
-add.scale.bar(cex = 0.7)
-
-# Keep Rooted but Drop Outgroup Branch
-p.tree <- drop.tip(ml.rooted, "Methanosarcina")
+# Keep rooted tree but drop outgroup branch
+ml.bootstrap.out <- read.tree("./data/ml_tree/RAxML_bipartitions.T1")
+ml.bootstrap <- drop.tip(ml.bootstrap.out, "Methanosarcina")
 ```
 
 # Phylogenetic regression (simple w/o dummy variable)
 ```{r}
-taxa <- sort(p.tree$tip.label)
-dat <- data.frame(umax, nb, srp)
-fit <- phylolm(log10(umax) ~ nb, data = dat, phy = p.tree, model = "lambda")
+taxa <- sort(ml.bootstrap$tip.label)
+dat <- data.frame(umax, nb)
+fit <- phylolm(log10(umax) ~ nb, data = dat, phy = ml.bootstrap, model = "lambda")
 summary(fit)
-
-fit <- phylolm(log10(srp) ~ nb, data = dat, phy = p.tree, model = "lambda")
-summary(fit)
+# When not coding by lake, intercept is marginally signficant (P = 0.099), not slope (P = 0.22)
 ```
 
 # Phylogenetic multiple regression
 ```{r}
 lake <- ifelse(grepl("WG",row.names(gr.data)),'WG', 'LL') # make an empty vector for lake id
-tradeoff <- data.frame(nb, umax, lake, srp) # make new data frame
+tradeoff <- data.frame(nb, umax, lake) # make new data frame
 D <- (lake == "LL") * 1
 
 fit <- phylolm(log10(tradeoff$umax) ~ tradeoff$nb + D + tradeoff$nb * D, data = tradeoff, 
-        phy = p.tree, model = "lambda")
+        phy = ml.bootstrap, model = "lambda")
 summary(fit)
 
+# With dummy variables model, there's a signficant interaction such that nb-umax relationship depends on lake (P = 0.028)
+
+# Is there a way to get an R2?
 ```
 
 # Plot trade-off with phylo-corrected parameters
@@ -129,9 +111,9 @@ png(filename="~/GitHub/PhosTrait/figures/Tradeoff.png",
   par(mar=c(4,4,0,1)+ 0.1)
 
 # Little Long points
-  plot(LL.nb, log10(LL.umax), axes = F, xlab = "Niche Breadth", ylab = "Maximum Growth Rate", 
-  pch = 21, cex = 2.0, las = 1, col = "black", bg = "white",
-  xlim=c(0,1), ylim = c(-2, 1), lwd = 1.5)
+  plot(LL.nb, log10(LL.umax), axes = F, xlab = "Niche breadth", ylab = "Maximum growth rate", 
+  pch = 21, cex = 2, cex.lab = 2, las = 1, col = "black", bg = "white",
+  xlim = c(0.2,1), ylim = c(-2, 1), lwd = 1.5)
 
 # Wintergreen points
   points(WG.nb, log10(WG.umax), pch = 21, cex = 2, col = "black", bg = "black")
@@ -146,13 +128,13 @@ png(filename="~/GitHub/PhosTrait/figures/Tradeoff.png",
   axis(side = 4, at = log10(ticks), labels = F)
 
 # Plot WG regression lines
-  curve(fit$coefficients[1] + fit$coefficients[2] * x, from = min(WG.nb - 0.1), 
-  to = max(WG.nb +0.1), add = TRUE, lty = 3, lwd = 2)
+  curve(fit$coefficients[1] + fit$coefficients[2] * x, from = 0.25, 
+  to = 0.95, add = TRUE, lty = 2, lwd = 2)
 
 # Plot LL regression lines
   Int <- fit$coefficients[1] + fit$coefficients[3]
   Slp <- fit$coefficients[2] + fit$coefficients[4]
-  curve((Int) + (Slp) * x, from = min(LL.nb - 0.08), to = max(LL.nb + 0.1), 
+  curve((Int) + (Slp) * x, from = 0.25, to = 0.95, 
       add = TRUE, lty = 2, lwd = 2)
 
 legend("topleft", legend = c("LL","WG"), pch = c(1, 16), cex = 1, 
@@ -160,29 +142,7 @@ legend("topleft", legend = c("LL","WG"), pch = c(1, 16), cex = 1,
 
 dev.off()
 graphics.off() # shuts down open devices
-```
 
-```{r fig.width=4, fig.height=4,echo=FALSE}
 img <- readPNG("./figures/Tradeoff.png")
 grid.raster(img)
 ```
-
-```{r}
-fit <- phylolm(log10(umax) ~ nb*D, data = tradeoff, 
-        phy = p.tree, model = "lambda")
-summary(fit)
-
-fit <- phylolm(log10(umax) ~ nb, data = tradeoff[tradeoff$lake == "LL", ], 
-               phy = drop.tip(p.tree, row.names(tradeoff)[which(tradeoff$lake != "LL")]), 
-               model = "lambda")
-summary(fit)
-
-fit <- phylolm(log10(umax) ~ nb, data = tradeoff[tradeoff$lake == "WG", ], 
-               phy = drop.tip(p.tree, row.names(tradeoff)[which(tradeoff$lake != "WG")]), 
-               model = "lambda")
-summary(fit)
-
-
-
-```
-
