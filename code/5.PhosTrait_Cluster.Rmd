@@ -7,7 +7,9 @@ output: pdf_document
 geometry: margin=2.54cm
 ---
 
-Generalist and specialist strategies of phosphorus acquistion by aquatic bacteria 
+Can we use our data to classify groups of phoshporus compounds?
+Do these clusters make sense based on theories developed elsewhere (Muscarella et al. 2014)?
+Are P sources substituable?
 
 ```{r}
 rm(list=ls())
@@ -15,23 +17,28 @@ getwd()
 setwd("~/GitHub/PhosTrait")
 ```
 
-Load package for writing figures
+# Load package
 ```{r}
-require("png")
-require("vegan")
-require("pvclust")
-require("mclust")
-require("fpc")
+tidy.opts=list(width.cutoff=60)  
+package.list <- c('ape', 'seqinr', 'muscle', 'phylolm', 'vegan', 'grid', 'png', 
+      'phylobase', 'adephylo', 'geiger', 'picante', 'stats', 'RColorBrewer', 'mclust',
+      'caper', 'phylolm', 'pmc', 'ggplot2', 'tidyr', 'dplyr', 'phangorn', 'pander', 'pvclust') 
+for (package in package.list) {
+  if (!require(package, character.only=TRUE, quietly=TRUE)) {
+    install.packages(package)
+    library(package, character.only=TRUE)
+  }
+}
 ```
 
-Load data and standardize 
+# Load data and standardize 
 ```{r}
 # Raw growth rate data
 gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
 str(gr.data)
 colnames(gr.data)[1]<-"isolate"
 
-# Data standardizing - log10 tranformation
+# Data standardizing - log10 transformation
 log.gr <- log10(gr.data[,2:19]+1)
 
 # Data standardizing - divide by sum of species growth
@@ -41,14 +48,21 @@ gr.std <- gr.data[,2:19] / (apply(gr.data[,2:19], 1, sum))
 data <- gr.std
 ```
 
-Hierarchical clustering
+# Hierarchical clustering
+Here we use aglomerative clustering, which minimizes within-cluster sums-of-squared
+distances between P resources. 
+
+Step 1: identify a distance metric. 
+Common metrics are `euclidean`, `manhattan`, `correlation`, `uncentered`, and `abscor`
+
 ```{r}
 # Identify distance metric
 dist <- "euclidean" 
-    # manhattan, correlation, uncentered,
-    # abscor, euclidean
+```
 
-# Identify agglomerative method
+Step 2: identify agglomerative clustering method:
+
+```{r}
 clust <- "average"   
     # complete = furthest neighbor; compact clusters, sensitive to outliers
     # average = UPGMA; considered robust
@@ -58,48 +72,55 @@ clust <- "average"
     # median = downweights outliers
     # centroid = fairly robust
     # single = nearest neighbor; chaining problem
-                    
-# Peform hierarchical cluster analysis (reduce nboot to 100 when playing)
-pv.clust <- pvclust(data, nboot = 10000, method.dist = dist, 
-                      method.hclust = clust)
 ```
+ 
+Step 3: perform hierarchical cluster analysis.
+Reduce nboot to 100 or 1000 when playing around. 
+Run 10,000 after (time consuming)
 
-Model-based Bayesian approach to identify clusters
 ```{r}
-# Not entirely sure how this works, but should help ID number of clusters
-mv.clust <- Mclust(data)
-plot(mv.clust) # plot results
-summary(mv.clust)
+pv.clust <- pvclust(data, nboot = 10000, method.dist = dist, 
+            method.hclust = clust)
 ```
 
-Plotting
+Notes on pvclust function (http://stat.sys.i.kyoto-u.ac.jp/prog/pvclust/):
+Assesses uncertainty in hierarchical cluster analysis. 
+For each cluster, p-values are calculated via multiscale bootstrap resampling. 
+P-value of a cluster is a value between 0 and 1, which indicates how strong the cluster is supported by data where higher values (e.g., 92) represent more support.
+
+The function provides two types of P-values: AU (Approximately Unbiased) P-values and BP (Bootstrap Probability) values. 
+AU P-values, which are computed by multiscale bootstrap resampling, are better approximations for unbiased P-value than BP value computed by normal bootstrap resampling. 
+
+For a cluster with AU p-value > 0.95, the hypothesis that "the cluster does not exist" is rejected with significance level 0.05
+
+# Plotting
 ```{r}
 # Initiate file for figure
 png(filename="~/GitHub/PhosTrait/figures/Cluster.png",
     width = 1200, height = 1200, res = 96*2)
 
 # Make plot
-plot(pv.clust, main = paste(dist, clust, sep = " "), cex = 1.0, 
-     cex.pv = 0.75, col.pv= c("red", "black", "gray"), 
-     print.pv = TRUE, print.num = FALSE)
+plot(pv.clust, main = NA, sub = NA, cex = 1.0, cex.pv = 1, 
+     col.pv = c("black", "white", "black"), print.pv = TRUE, 
+     print.num = FALSE, float = 0.02, lwd = 2, xlab = NA, 
+     cex.lab = 1.5, las  = 2)
 
-# AU = "approximately unbiased" p-value 
-# "Clusters that are highly supported by the data will have large p values."
-# BP = "bootstrap probability"
+# Highlights clusters based on P-values
+# That is, clusters don't exist in highlighted regions
+# Type "geq" clusters with p-value >= than alpha threshold
+# Type "leq" clusters with p-value <= than alpha threshold
 
-# Highlight clusters based on p-values
-pvrect(pv.clust, alpha = 0.95, type="geq") 
+pvrect(pv.clust, alpha = 0.95, pv = "au", type = "geq", 
+       border = "grey", lwd = 2.5, lty = 2) 
 
 dev.off()
-graphics.off() # shuts down open devices
+graphics.off() 
+
+img <- readPNG("./figures/Cluster.png")
+grid.raster(img)
+
+# Diagnostic plot for standard error of p-value
+print(pv.clust)
+seplot(pv.clust)
+# Standard errors are small
 ```
-
-
-Validating cluster solutions
-```{r}
-# compare 2 cluster solutions
-cluster.stats(d, fit1$cluster, fit2$cluster)
-
-# haven't tried this yet...
-
-# where d is a distance matrix among objects, and fit1$cluster and fit$cluster are integer vectors containing classification results from two different clusterings of the same data.
