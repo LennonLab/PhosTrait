@@ -16,7 +16,7 @@ setwd("~/GitHub/PhosTrait")
 
 # Load packages
 ```{r}
-tidy.opts=list(width.cutoff=60)} 
+tidy.opts=list(width.cutoff=60) 
 package.list <- c('ape', 'seqinr', 'muscle', 'phylolm', 'vegan', 'grid', 'png', 
       'phylobase', 'adephylo', 'geiger', 'picante', 'stats', 'RColorBrewer', 
       'caper', 'phylolm', 'pmc', 'ggplot2', 'tidyr', 'dplyr', 'phangorn', 'pander') 
