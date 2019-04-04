@@ -69,7 +69,7 @@ colnames(nb) <- c("nb")
 # Read in alignment and visualize
 ```{r}
 # Read Alignment File {seqinr}
-read.aln <- read.alignment(file = "./data/p.isolate.afa", format = "fasta")  
+read.aln <- read.alignment(file = "./data/2019_ML_Tree/20190322_PhosTrait.fasta", format = "fasta")  
 
 # Convert Alignment File to DNAbin Object {ape}
 p.DNAbin <- as.DNAbin(read.aln) 
@@ -87,7 +87,9 @@ grid(nrow(window), col = "lightgrey")
 # Build Maximum Likelihood tree
 ```{r}
 # Keep Rooted but Drop Outgroup Branch
-ml.bootstrap.out <- read.tree("./data/ml_tree/RAxML_bipartitions.T1")
+#ml.bootstrap.out <- read.tree("./data/ml_tree/RAxML_bipartitions.T1")
+ml.bootstrap.out <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.OutPhos")
+
 ml.bootstrap <- drop.tip(ml.bootstrap.out, "Methanosarcina")
 par(mar = c(1,1,2,1) + 0.1)
 plot.phylo(ml.bootstrap, type = "phylogram", direction = "right", show.tip.label=TRUE,
