@@ -12,13 +12,11 @@ Generalist and specialist strategies of phosphorus acquistion by aquatic bacteri
 # Set working directory
 ```{r}
 rm(list=ls())
-getwd()
 setwd("~/GitHub/PhosTrait")
 ```
 
 # Load packages
-```{r}
-tidy.opts=list(width.cutoff=60)} 
+```{r tidy.opts=list(width.cutoff=60)} 
 package.list <- c('ape', 'seqinr', 'muscle', 'phylolm', 'vegan', 'grid', 'png', 
       'phylobase', 'adephylo', 'geiger', 'picante', 'stats', 'RColorBrewer', 
       'caper', 'phylolm', 'pmc', 'ggplot2', 'tidyr', 'dplyr', 'phangorn', 'pander') 
@@ -90,7 +88,14 @@ grid(nrow(window), col = "lightgrey")
 #ml.bootstrap.out <- read.tree("./data/ml_tree/RAxML_bipartitions.T1")
 ml.bootstrap.out <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.OutPhos")
 
-ml.bootstrap <- drop.tip(ml.bootstrap.out, "Methanosarcina")
+# Remove Neighbors
+ptrait.samps <- c(row.names(gr.data), "Methanosarcina")
+neighbors <- setdiff(ml.bootstrap.out$tip.label, ptrait.samps)
+ml.bootstrap.samps <- drop.tip(ml.bootstrap.out, neighbors)
+
+# Outgroup
+ml.bootstrap <- drop.tip(ml.bootstrap.samps, "Methanosarcina")
+
 par(mar = c(1,1,2,1) + 0.1)
 plot.phylo(ml.bootstrap, type = "phylogram", direction = "right", show.tip.label=TRUE,
            use.edge.length = FALSE, cex = 0.6, label.offset = 1, 
