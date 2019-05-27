@@ -7,7 +7,7 @@ output: pdf_document
 geometry: margin=2.54cm
 ---
 
-Overview: make heatmaps with our data to visualize use of different phosphorus (P) sources by bacteria from an oligotrophic lake (Little Long) and eutrophic lake (Wintergreen Lake). First panel (upper left) randomizes the the data by row and column. Second panel (upper right) randomizes so that there's no difference among strains. Third panel (lower left) randomizes so that there's no difference among P sources. Fourth panel (lower right) is the observed data. 
+Overview: make heatmaps with our data to visualize use of different phosphorus (P) sources by bacteria from an oligotrophic lake (Little Long) and eutrophic lake (Wintergreen Lake). First panel (upper left) randomizes the the data by row and column. Second panel (upper right) randomizes so there are differences among strains (not P sources). Third panel (lower left) randomizes so there are difference among P sources (not strains). Fourth panel (lower right) is the observed data. 
 
 # Set working directory
 ```{r}
@@ -26,6 +26,7 @@ require("gridGraphics")
 require("grid")
 require("gplots")
 require("gridExtra")
+require("viridis")
 ```
 
 # Load data 
@@ -35,21 +36,23 @@ gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
 str(gr.data)
 colnames(gr.data)[1]<-"isolate"
 
-# Data standardizing - log10 tranformation
-log.gr <- log10(gr.data[,2:19]+1)
+# Log transformed raw data 
+gr.raw <- gr.data[,2:19]
+gr.raw.log <- log10(gr.raw + 0.001)
 
-# Data standardizing - divide by sum of species growth
+# Standardizing 1: divide each observation by sum of species growth
 gr.std <- gr.data[,2:19] / (apply(gr.data[,2:19], 1, sum))
 
+# Standarizing 2: center and scale log-transformed growth
+gr.std2 <- (gr.raw.log - mean(unlist(gr.raw.log))) # / sd(unlist(gr.raw.log))
+
 # Names
-resources <- colnames(gr.data[,2:19])
+resources <- colnames(gr.raw)
 strains <- gr.data[,1]
 ```
 
 # Customize color palette
 ```{r}
-# This website is useful for generating colors: http://colorbrewer2.org/#type=sequential&scheme=Reds&n=8
-
 jet.col <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", 
                                  "#7FFF7F", "yellow", "#FF7F00", "red", 
                                  "#7F0000"))
@@ -61,7 +64,9 @@ yelred.col <- colorRampPalette(c("yellow","orange", "red"))
 green.col <- colorRampPalette(c("#e5f5e0", "#c7e9c0", "#a1d99b", 
                         "#74c476", "#41ab5d", "#238b45", "#00441b"))
 
-colors <- green.col
+viridis.col <-colorRampPalette(viridis(12))
+
+colors <- viridis.col
 ```
 
 # Clustering parameters
@@ -85,37 +90,30 @@ clust <- "average"
 
 # Create four data sets for plotting
 ```{r}
-# 1) Randomize growth rate data
-log.gr.mat <- as.matrix(log.gr)
-colnames(log.gr.mat) <- colnames(gr.data[,2:19])
-rownames(log.gr.mat) <- gr.data[,1]
-rand <- matrix(sample(log.gr.mat), nrow = nrow(log.gr))
+# Create matrix (add mean back to scale to zero)
+mat <- as.matrix(gr.raw.log) + (-mean(as.matrix(gr.raw.log)))
 
-# 2) Randomize by strain holding resource constant 
-# That is, simluate differenes among resources
+# Quad 1 - Randomize on all
+full_rand <- matrix(sample(unlist(mat)), nrow = nrow(mat))
 
-# Calculate column means
-col.means <-colMeans(log.gr)
+# Quad 2 - Simulate on row means
+row_rand <- matrix(NA, nrow = nrow(mat), ncol = ncol(mat))
+for(i in 1:nrow(row_rand)){
+  temp.mean <- mean(mat[i, ])
+  temp.sd <- sd(mat[i, ])
+  row_rand[i, ] <- rnorm(n = dim(mat)[2], mean = temp.mean, sd = temp.sd * 0.1)
+}
 
-# Calculate standard deviation of columns
-col.sd <- apply(log.gr, 2, sd)
+# Quad 3 - Randomize on column means
+col_rand <- matrix(NA, nrow = nrow(mat), ncol = ncol(mat))
+for(i in 1:ncol(col_rand)){
+  temp.mean <- mean(mat[, i])
+  temp.sd <- sd(mat[, i])
+  col_rand[, i] <- rnorm(n = dim(mat)[1], mean = temp.mean, sd = temp.sd * 0.1)
+}
 
-# Create dataframe with mean column and sd
-col.wise <- mapply(rnorm, nrow(log.gr), col.means, col.sd/30)
-colnames(col.wise) <- resources
-
-# 3. Randomize by resource holding strain constant 
-# That is, simluate differenes among strains
-
-# Calculate row means
-row.means <-rowMeans(log.gr)
-
-# Calculate standard deviation of rows
-row.sd <- apply(log.gr, 1, sd)
-
-# Create dataframe with mean rows and sd
-row.wise <- t(mapply(rnorm,ncol(log.gr), row.means, row.sd/30))
-colnames(row.wise) <- colnames(log.gr)
+# Quad 4 - Observed data
+no_rand <- mat
 ```
 
 # Make multipanel heatmap
@@ -123,7 +121,7 @@ colnames(row.wise) <- colnames(log.gr)
 # Example: http://stackoverflow.com/questions/13081310/combining-multiple-complex-plots-as-panels-in-a-single-figure
 
 # Make a list of dataframes for each scenario
-heat.list <- list(rand, col.wise, row.wise, log.gr)
+heat.list <- list(full_rand, row_rand, col_rand, no_rand)
 
 # Function for running through list
 grab_grob <- function(){
@@ -132,8 +130,8 @@ grab_grob <- function(){
 }
 
 gl <- lapply(1:4, function(i){
-  heatmap.2(as.matrix(heat.list[[i]]), distfun = function(x) 
-          vegdist(x, method = distance), hclustfun = function(x) 
+  heatmap.2(as.matrix(heat.list[[i]]), distfun = function(x)  
+          vegdist(x, method = distance), hclustfun = function(x)
           hclust(x, method = clust), key = FALSE, keysize = 1,
           key.title = NA, key.xlab = NA, col = colors, trace = "none", 
           density.info = "none", labRow = strains, 
