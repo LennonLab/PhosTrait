@@ -34,18 +34,18 @@ for (package in package.list) {
 # Load data and standardize 
 ```{r}
 # Raw growth rate data
-gr.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
-str(gr.data)
-colnames(gr.data)[1]<-"isolate"
+gr.raw.data <- read.csv("data/grraw.csv", sep=",", header=TRUE)
+str(gr.raw.data)
+colnames(gr.raw.data)[1]<-"isolate"
 
 # Data standardizing - log10 transformation
-log.gr <- log10(gr.data[,2:19]+1)
+gr.raw.log <- log10(gr.data[,2:19]+0.001)
 
 # Data standardizing - divide by sum of species growth
-gr.std <- gr.data[,2:19] / (apply(gr.data[,2:19], 1, sum))
+gr.std <- gr.raw.data[,2:19] / (apply(gr.raw.data[,2:19], 1, sum))
 
 # Choose data for clustering
-data <- gr.std
+data <- gr.raw.log
 ```
 
 # Hierarchical clustering
@@ -123,4 +123,94 @@ grid.raster(img)
 print(pv.clust)
 seplot(pv.clust)
 # Standard errors are small
+```
+
+# Plot ranked growth on different P sources
+
+```{r}
+
+# Calcualte mean, SEM, and sort for plotting
+p.means <- apply(gr.raw.data[,2:19], 2, mean)
+sem <- function(x, ...){sd(x, na.rm = TRUE)/sqrt(length(na.omit(x)))}
+p.sem <- apply(gr.raw.data[,2:19], 2, sem)
+p.95.LL <- apply(gr.raw.data[,2:19], 2, FUN = function(x) t.test(x)$conf.int[1])
+p.95.UL <- apply(gr.raw.data[,2:19], 2, FUN = function(x) t.test(x)$conf.int[2])
+p.combo <- data.frame(p.means, p.sem, p.95.LL, p.95.UL)
+p.sort <- p.combo[order(p.combo$p.means),]
+p.rank.name <- rownames(p.sort)
+
+# For plotting only, we set zero values to 0.001
+gr.raw.data[gr.raw.data==0]<-0.0001
+
+# Reorder columns (p sources) of raw data by sorted rank
+gr.raw.data.rank<-gr.raw.data[p.rank.name]
+j <- c(1:39)
+gr.raw.data.rank <- data.frame(j,gr.raw.data.rank)
+
+# Plotting
+
+# Initiate file for figure
+png(filename="~/GitHub/PhosTrait/figures/Ranked.P.png",
+    width = 1200, height = 800, res = 96*2)
+
+par(mar = c(4, 5, 1, 1))
+
+p.plot <- plot(jitter(rep(1, dim(gr.raw.data.rank)[1]), amount = 0.1), 
+               gr.raw.data.rank[,2], ylim = c(0.00001, 5), xlim = c(-2, 39), log = "y",
+               pch = 21, col = "lightgrey", bg = "lightgrey", lwd = 2, cex = 1.7, 
+               yaxt = "n", xaxt = "n", cex.lab = 2, cex.axis = 1.5, las = 1, ylab = "", xlab = "")
+
+box(lwd = 2)
+
+for(i in 3:19) {
+  points(gr.raw.data.rank$j, gr.raw.data.rank[[i]], pch = 21, bg = "lightgrey", col = "lightgrey", lwd = 2, cex = 1.7)
+}
+
+mtext('Growth rate', side = 2, 
+      outer = TRUE, cex = 2, line = -1.5, adj = 0.5)
+
+# Major Axes
+
+axis(side = 2, lwd.ticks = 2, cex.axis = 1.5, las = 1,at = c(0.0001, 0.001, 0.01, 0.1, 1), 
+     labels = c(expression(paste("10"^"-4")), expression(paste("10"^"-3")), expression(paste("10"^"-2")),
+     expression(paste("10"^"-1")), expression(paste("10"^"0"))))
+ 
+axis(side = 4, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+    at=c(0.0001, 0.001, 0.01, 0.1, 1), labels = F)
+ 
+
+axis(side = 1, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+    labels = c(p.rank.name), at = c(1:18))
+
+
+xtick<-p.rank.name
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 45, pos = 1, xpd = TRUE)
+
+
+# # Minor Axes
+# axis(side = 2, tck = -0.015, labels = F, lwd.ticks = 2,
+#        at = c(0.05, 0.1, 0.25, 0.5, 2))
+# 
+# axis(side = 4, tck = -0.015, labels = F, lwd.ticks = 2,
+#        at = c(0.05, 0.1, 0.25, 0.5, 2))
+
+
+# Adding means and 95 % confidence intervals
+points(c(1:18), p.sort$p.means, pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+
+arrows(x0 = c(1:18), y0 = p.sort$p.means, y1 = p.sort$p.95.LL, angle = 90,
+       length = 0.1, lwd = 2)
+arrows(x0 = c(1:18), y0 = p.sort$p.means, y1 = p.sort$p.95.UL, angle = 90,
+       length=0.1, lwd = 2)
+
+dev.off()
+graphics.off() 
+
+img <- readPNG("./figures/Ranked.P.png")
+grid.raster(img)
+
+
 ```
