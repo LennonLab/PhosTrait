@@ -25,3 +25,5 @@ This project explores generalist and specialist phosphorus strategies.
 ## Contributors
 
 [Dr. Jay Lennon](http://www.indiana.edu/~microbes/people.php): Principle Investigator, Associate Professor, Department of Biology, Indiana University, Bloomington. Head of the [Lennon Lab](http://www.indiana.edu/~microbes/people.php).
+
+[Mario Muscarella](http://mmuscarella.github.io/):  

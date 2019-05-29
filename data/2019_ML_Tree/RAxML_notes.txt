@@ -1,0 +1,46 @@
+RAxML Notes
+
+3 May 2019
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
+    -s 20190322_PhosTrait.fasta -n OutPhos 
+
+
+5 May 2019
+
+We still have low bootstrap scores. But I'm thinking about the consequence of our sequences not all being trimed the same. So I'm going to retrim them. 
+
+pcr.seqs(fasta=PTraitAlign.ordered.long.merged.fasta, start=129, end=597, keepdots=F)
+
+output = PTraitAlign.ordered.long.merged.pcr.fasta
+
+
+Actually: worked better when I did this with the output of the Silva alignment
+
+summary.seqs(fasta=20190505_PhosTrait.fasta)
+pcr.seqs(fasta=20190505_PhosTrait.fasta, start=88, end=447, keepdots=F)
+
+output = 20190505_PhosTrait.pcr.fasta
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
+    -s 20190505_PhosTrait.pcr.fasta -n RAxML_Phos 
+
+
+
+summary.seqs(fasta=arbsilva.fa)
+pcr.seqs(fasta=arbsilva.fa, start=88, end=447, keepdots=F)
+
+output = 20190505_PhosTrait.pcr.fasta
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
+    -s 20190505_PhosTrait.pcr.fasta -n PhosRAxML_Full
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
+    -s 20190505_PhosTrait.pcr.short.fasta -n PhosRAxML_Short
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  -# autoMRE -s 20190505_PhosTrait.pcr.short.fasta -n PhosRAxML_ShortRoot
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  -# autoMRE -s 20190505_PhosTrait.pcr.outgroup.fasta -n PhosRAxML_FullRoot
+
+
+20190505_PhosTrait.pcr.outgroup.fasta

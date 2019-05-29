@@ -1,0 +1,71 @@
+Mac version
+
+Using ReadLine,Boost,HDF5
+mothur v.1.41.2
+Last updated: 1/23/19
+by
+Patrick D. Schloss
+
+Department of Microbiology & Immunology
+
+University of Michigan
+http://www.mothur.org
+
+When using, please cite:
+Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.
+
+Distributed under the GNU General Public License
+
+Type 'help()' for information on the commands that are available
+
+For questions and analysis support, please visit our forum at https://www.mothur.org/forum
+
+Type 'quit()' to exit program
+
+Interactive Mode
+
+
+
+mothur > summary.seqs(fasta=20190505_PhosTrait.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	447	325	0	4	1
+2.5%-tile:	1	447	347	0	4	9
+25%-tile:	1	1186	1150	0	5	86
+Median: 	20	1227	1186	0	5	172
+75%-tile:	49	1254	1223	0	5	257
+97.5%-tile:	88	1254	1250	3	6	334
+Maximum:	88	1254	1251	24	8	342
+Mean:	30	1133	1090	0	5
+# of Seqs:	342
+
+It took 0 secs to summarize 342 sequences.
+
+Output File Names:
+ 20190505_PhosTrait.summary
+
+
+mothur > summary.seqs(fasta=20190322_PhosTrait.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	524	468	0	4	1
+2.5%-tile:	1	621	560	0	5	10
+25%-tile:	1	1214	1154	0	5	96
+Median: 	18	1237	1197	0	5	192
+75%-tile:	42	1254	1230	0	5	287
+97.5%-tile:	60	1254	1250	2	6	373
+Maximum:	87	1254	1251	24	8	382
+Mean:	22	1178	1141	0	5
+# of Seqs:	382
+
+It took 0 secs to summarize 382 sequences.
+
+Output File Names:
+ 20190322_PhosTrait.summary
+
+
+mothur > quit()

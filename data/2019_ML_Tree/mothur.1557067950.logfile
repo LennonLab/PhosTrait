@@ -1,0 +1,63 @@
+Mac version
+
+Using ReadLine,Boost,HDF5
+mothur v.1.41.2
+Last updated: 1/23/19
+by
+Patrick D. Schloss
+
+Department of Microbiology & Immunology
+
+University of Michigan
+http://www.mothur.org
+
+When using, please cite:
+Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.
+
+Distributed under the GNU General Public License
+
+Type 'help()' for information on the commands that are available
+
+For questions and analysis support, please visit our forum at https://www.mothur.org/forum
+
+Type 'quit()' to exit program
+
+Interactive Mode
+
+
+
+mothur > summary.seqs(fasta=arbsilva.fa)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	692	597	0	4	1
+2.5%-tile:	28	730	619	0	4	2
+25%-tile:	62	813	675	0	5	11
+Median: 	80	879	716	0	5	21
+75%-tile:	98	937	803	0	5	31
+97.5%-tile:	127	1552	1426	15	8	40
+Maximum:	127	1552	1426	15	8	40
+Mean:	77	922	787	0	5
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ arbsilva.summary
+
+
+mothur > quit(
+[ERROR]: You are missing )
+[ERROR]: Invalid.
+
+mothur > quit()
+
+
+************************************************************
+************************************************************
+************************************************************
+Detected 2 [ERROR] messages, please review.
+************************************************************
+************************************************************
+************************************************************
