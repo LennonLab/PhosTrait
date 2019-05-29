@@ -39,7 +39,7 @@ str(gr.raw.data)
 colnames(gr.raw.data)[1]<-"isolate"
 
 # Data standardizing - log10 transformation
-gr.raw.log <- log10(gr.data[,2:19]+0.001)
+gr.raw.log <- log10(gr.raw.data[,2:19]+0.001)
 
 # Data standardizing - divide by sum of species growth
 gr.std <- gr.raw.data[,2:19] / (apply(gr.raw.data[,2:19], 1, sum))
@@ -144,8 +144,8 @@ gr.raw.data[gr.raw.data==0]<-0.0001
 
 # Reorder columns (p sources) of raw data by sorted rank
 gr.raw.data.rank<-gr.raw.data[p.rank.name]
-j <- c(1:39)
-gr.raw.data.rank <- data.frame(j,gr.raw.data.rank)
+j <- rank(colMeans(gr.raw.data.rank))
+# gr.raw.data.rank <- data.frame(j,gr.raw.data.rank)
 
 # Plotting
 
@@ -155,15 +155,21 @@ png(filename="~/GitHub/PhosTrait/figures/Ranked.P.png",
 
 par(mar = c(4, 5, 1, 1))
 
-p.plot <- plot(jitter(rep(1, dim(gr.raw.data.rank)[1]), amount = 0.1), 
-               gr.raw.data.rank[,2], ylim = c(0.00001, 5), xlim = c(-2, 39), log = "y",
-               pch = 21, col = "lightgrey", bg = "lightgrey", lwd = 2, cex = 1.7, 
-               yaxt = "n", xaxt = "n", cex.lab = 2, cex.axis = 1.5, las = 1, ylab = "", xlab = "")
+p.plot <- plot(x = rnorm(dim(gr.raw.data.rank)[1], 1, 0.05), 
+               y = gr.raw.data.rank[,1], 
+               ylim = c(0.00001, 5), xlim = c(0, 18), log = "y",
+               pch = 21, col = "lightgrey", bg = "lightgrey", 
+               lwd = 2, cex = 1.7, 
+               yaxt = "n", xaxt = "n", cex.lab = 2, cex.axis = 1.5, 
+               las = 1, ylab = "", xlab = "")
 
 box(lwd = 2)
 
-for(i in 3:19) {
-  points(gr.raw.data.rank$j, gr.raw.data.rank[[i]], pch = 21, bg = "lightgrey", col = "lightgrey", lwd = 2, cex = 1.7)
+for(i in 2:18) {
+  points(x = rnorm(dim(gr.raw.data.rank)[1], i, 0.05), 
+         y = gr.raw.data.rank[,i], 
+         pch = 21, bg = "lightgrey", col = "lightgrey", 
+         lwd = 2, cex = 1.7)
 }
 
 mtext('Growth rate', side = 2, 
@@ -173,7 +179,7 @@ mtext('Growth rate', side = 2,
 
 axis(side = 2, lwd.ticks = 2, cex.axis = 1.5, las = 1,at = c(0.0001, 0.001, 0.01, 0.1, 1), 
      labels = c(expression(paste("10"^"-4")), expression(paste("10"^"-3")), expression(paste("10"^"-2")),
-     expression(paste("10"^"-1")), expression(paste("10"^"0"))))
+     expression(paste("10"^"-1")), expression(paste("10"^" 0"))))
  
 axis(side = 4, lwd.ticks = 2, cex.axis = 1.5, las = 1,
     at=c(0.0001, 0.001, 0.01, 0.1, 1), labels = F)
