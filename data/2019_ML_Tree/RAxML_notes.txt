@@ -33,14 +33,18 @@ pcr.seqs(fasta=arbsilva.fa, start=88, end=447, keepdots=F)
 output = 20190505_PhosTrait.pcr.fasta
 
 raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
-    -s 20190505_PhosTrait.pcr.fasta -n PhosRAxML_Full
+    -s 20190505_PhosTrait.fasta -n PhosRAxML_Full
 
 raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
-    -s 20190505_PhosTrait.pcr.short.fasta -n PhosRAxML_Short
+    -s 20190505_PhosTrait.short.fasta -n PhosRAxML_Short
 
-raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  -# autoMRE -s 20190505_PhosTrait.pcr.short.fasta -n PhosRAxML_ShortRoot
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  \
+-# autoMRE -s 20190505_PhosTrait.short.fasta -n PhosRAxML_ShortRoot
 
-raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  -# autoMRE -s 20190505_PhosTrait.pcr.outgroup.fasta -n PhosRAxML_FullRoot
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  \
+-# autoMRE -s 20190505_PhosTrait.pcr.outgroup.fasta -n PhosRAxML_FullRoot
 
 
 20190505_PhosTrait.pcr.outgroup.fasta
+
+PhosRAxML_Short
