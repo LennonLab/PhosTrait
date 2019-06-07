@@ -1,5 +1,66 @@
 RAxML Notes
 
+
+6/6/2019
+New Plan:
+I removed the outgroup from the raw file and uploaded to SINA. 
+I used this to search and classify and add up to 10 neighbors for each.
+Note: there are no Methanosarcina neighbors added here b/c I removed the OG
+I exported the output and saved the neighbors only as a seperate file
+I merged the neighbors with the original merged file. New Files:
+
+20190606_PhosTrait_Seqs.fasta - No Neighbors
+20190606_PhosTrait_Seqs_wNeighbors.fasta - Includes Neighbors (10)
+20190607_PhosTrait_Seqs_wNeighbors.fasta - Includes Neighbors (2)
+
+I then uploaded each of these to SINA and did the Alignment using the Bacterial variability profile
+
+The output alignments are saved as 
+20190606_PhosTrait_Sina.fasta
+20190606_PhosTrait_wNeighbors_Sina.fasta
+20190607_PhosTrait_wNeighbors_Sina.fasta
+
+I'm going to filter the seqs so they all have the same start and end.
+done with Mothur:
+filter.seqs(fasta=20190606_PhosTrait_Sina.fasta, vertical=T, trump=.)
+filter.seqs(fasta=20190606_PhosTrait_wNeighbors_Sina.fasta, vertical=T, trump=.)
+filter.seqs(fasta=20190607_PhosTrait_wNeighbors_Sina.fasta, vertical=T, trump=.)
+
+
+I'm uploading these to Rosalind
+
+I am now going to make trees for each of these. 
+I will do two runs for each: w/ and w/o rooting
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRCAT -p 12345 -x 12345 -# autoMRE \
+-s 20190606_PhosTrait_Sina.filter.fasta -n PhosRAxML_20190606
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRCAT -p 12345 -x 12345 -o Methanosarcina  \
+-# autoMRE -s 20190606_PhosTrait_Sina.filter.fasta -n PhosRAxML_20190606_Root
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRCAT -p 12345 -x 12345 -# autoMRE \
+-s 20190606_PhosTrait_wNeighbors_Sina.filter.fasta -n PhosRAxML_20190606_Neighbors
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRCAT -p 12345 -x 12345 -o Methanosarcina  \
+-# autoMRE -s 20190606_PhosTrait_wNeighbors_Sina.filter.fasta -n PhosRAxML_20190606_Neighbors_Root
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRCAT -p 12345 -x 12345 -# autoMRE \
+-s 20190607_PhosTrait_wNeighbors_Sina.filter.fasta -n PhosRAxML_20190607_Neighbors
+
+raxmlHPC-PTHREADS -T 12 -f a -m GTRCAT -p 12345 -x 12345 -o Methanosarcina  \
+-# autoMRE -s 20190607_PhosTrait_wNeighbors_Sina.filter.fasta -n PhosRAxML_20190607_Neighbors_Root
+
+
+
+Output:
+RAxML_bipartitions.PhosRAxML_20190606    
+RAxML_bipartitions.PhosRAxML_20190606_Neighbors  
+RAxML_bipartitions.PhosRAxML_20190606_Neighbors_Root 
+RAxML_bipartitions.PhosRAxML_20190606_Root  
+
+
+----------------------------------------
+
 3 May 2019
 
 raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
@@ -33,14 +94,18 @@ pcr.seqs(fasta=arbsilva.fa, start=88, end=447, keepdots=F)
 output = 20190505_PhosTrait.pcr.fasta
 
 raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
-    -s 20190505_PhosTrait.pcr.fasta -n PhosRAxML_Full
+    -s 20190505_PhosTrait.fasta -n PhosRAxML_Full
 
 raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -# autoMRE \
-    -s 20190505_PhosTrait.pcr.short.fasta -n PhosRAxML_Short
+    -s 20190505_PhosTrait.short.fasta -n PhosRAxML_Short
 
-raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  -# autoMRE -s 20190505_PhosTrait.pcr.short.fasta -n PhosRAxML_ShortRoot
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  \
+-# autoMRE -s 20190505_PhosTrait.short.fasta -n PhosRAxML_ShortRoot
 
-raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  -# autoMRE -s 20190505_PhosTrait.pcr.outgroup.fasta -n PhosRAxML_FullRoot
+raxmlHPC-PTHREADS -T 12 -f a -m GTRGAMMA -p 12345 -x 12345 -o Methanosarcina  \
+-# autoMRE -s 20190505_PhosTrait.pcr.outgroup.fasta -n PhosRAxML_FullRoot
 
 
 20190505_PhosTrait.pcr.outgroup.fasta
+
+PhosRAxML_Short

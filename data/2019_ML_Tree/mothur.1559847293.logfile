@@ -1,0 +1,69 @@
+Mac version
+
+Using ReadLine,Boost,HDF5
+mothur v.1.41.2
+Last updated: 1/23/19
+by
+Patrick D. Schloss
+
+Department of Microbiology & Immunology
+
+University of Michigan
+http://www.mothur.org
+
+When using, please cite:
+Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.
+
+Distributed under the GNU General Public License
+
+Type 'help()' for information on the commands that are available
+
+For questions and analysis support, please visit our forum at https://www.mothur.org/forum
+
+Type 'quit()' to exit program
+
+Interactive Mode
+
+
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Sina.fasta, vertical=T, trump=.)
+
+Using 4 processors.
+Creating Filter... 
+It took 0 secs to create filter for 40 sequences.
+
+
+Running Filter... 
+It took 0 secs to filter 40 sequences.
+
+
+
+Length of filtered alignment: 566
+Number of columns removed: 49434
+Length of the original alignment: 50000
+Number of sequences used to construct filter: 40
+
+Output File Names: 
+20190606_PhosTrait_Sina.filter
+20190606_PhosTrait_Sina.filter.fasta
+
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Seqs_wNeighbors_Sina.fasta, vertical=T, trump=.)
+Unable to open 20190606_PhosTrait_Seqs_wNeighbors_Sina.fasta. Trying default /usr/local/bin/20190606_PhosTrait_Seqs_wNeighbors_Sina.fasta.
+Unable to open /usr/local/bin/20190606_PhosTrait_Seqs_wNeighbors_Sina.fasta. Trying mothur's executable location /usr/local/bin/20190606_PhosTrait_Seqs_wNeighbors_Sina.fasta.
+Unable to open /usr/local/bin/20190606_PhosTrait_Seqs_wNeighbors_Sina.fasta.
+no valid files.
+
+Using 4 processors.
+[ERROR]: did not complete filter.seqs.
+
+mothur > quit()
+
+
+************************************************************
+************************************************************
+************************************************************
+Detected 1 [ERROR] messages, please review.
+************************************************************
+************************************************************
+************************************************************

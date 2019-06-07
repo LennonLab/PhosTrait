@@ -1,0 +1,51 @@
+Mac version
+
+Using ReadLine,Boost,HDF5
+mothur v.1.41.2
+Last updated: 1/23/19
+by
+Patrick D. Schloss
+
+Department of Microbiology & Immunology
+
+University of Michigan
+http://www.mothur.org
+
+When using, please cite:
+Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.
+
+Distributed under the GNU General Public License
+
+Type 'help()' for information on the commands that are available
+
+For questions and analysis support, please visit our forum at https://www.mothur.org/forum
+
+Type 'quit()' to exit program
+
+Interactive Mode
+
+
+
+mothur > filter.seqs(fasta=20190607_PhosTrait_wNeighbors_Sina.fasta, vertical=T, trump=.)
+
+Using 4 processors.
+Creating Filter... 
+It took 1 secs to create filter for 110 sequences.
+
+
+Running Filter... 
+It took 0 secs to filter 110 sequences.
+
+
+
+Length of filtered alignment: 569
+Number of columns removed: 49431
+Length of the original alignment: 50000
+Number of sequences used to construct filter: 110
+
+Output File Names: 
+20190607_PhosTrait_wNeighbors_Sina.filter
+20190607_PhosTrait_wNeighbors_Sina.filter.fasta
+
+
+mothur > quit()

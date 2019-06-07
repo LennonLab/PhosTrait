@@ -1,0 +1,133 @@
+title: "Phosphorus Traits - Phylogenies"
+author: "Jay T. Lennon, Mario Muscarella, Kali Bird"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+  - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+Generalist and specialist strategies of phosphorus acquistion by aquatic bacteria 
+
+# Set Working Directory
+```{r}
+rm(list=ls())
+setwd("~/GitHub/PhosTrait/code/")
+opar <- par(no.readonly = TRUE)  # Saves plot defaults
+```
+
+# Load Packages
+```{r tidy.opts=list(width.cutoff=60)} 
+package.list <- c('ape', 'seqinr', 'muscle', 'phylolm', 'vegan', 'grid', 'png', 
+      'phylobase', 'adephylo', 'geiger', 'picante', 'stats', 'RColorBrewer', 
+      'caper', 'phylolm', 'pmc', 'ggplot2', 'tidyr', 'dplyr', 'phangorn', 'pander') 
+for (package in package.list) {
+  if (!require(package, character.only=TRUE, quietly=TRUE)) {
+    install.packages(package)
+    library(package, character.only=TRUE)
+  }
+}
+```
+
+# Load Growth Rate Data
+```{r}
+gr.data <- read.csv("../data/grraw.csv", sep=",", header = TRUE, row.names = 1)
+str(gr.data)
+```
+
+# Load Phylogenies
+```{r}
+# Load Raw Trees
+ml.seqs <- read.tree("../data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_20190606")
+ml.seqs.root <- read.tree("../data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_20190606_Root")
+ml.seqs_wn <- read.tree("../data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_20190607_Neighbors")
+ml.seqs_wn.root <- read.tree("../data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_20190607_Neighbors_Root")
+
+# Remove Neighbors
+ptrait.samps <- c(row.names(gr.data), "Methanosarcina")
+ml.seqs.samps <- ape::keep.tip(ml.seqs, ptrait.samps)
+ml.seqs.root.samps <- ape::keep.tip(ml.seqs.root, ptrait.samps)
+ml.seqs_wn.samps <- ape::keep.tip(ml.seqs_wn, ptrait.samps)
+ml.seqs_wn.root.samps <- ape::keep.tip(ml.seqs_wn.root, ptrait.samps)
+
+length(setdiff(ml.seqs.samps$tip.label, ml.seqs.root.samps$tip.label))
+length(setdiff(ml.seqs.samps$tip.label, ml.seqs_wn.samps$tip.label))
+length(setdiff(ml.seqs_wn.samps$tip.label, ml.seqs_wn.root.samps$tip.label))
+
+# Root Using Outgroup
+ml.seqs.samps.rooted <- root(ml.seqs.samps, "Methanosarcina")
+ml.seqs.root.samps.rooted <- root(ml.seqs.root.samps, "Methanosarcina")
+ml.seqs_wn.samps.rooted <- root(ml.seqs_wn.samps, "Methanosarcina")
+ml.seqs_wn.root.samps.rooted <- root(ml.seqs_wn.root.samps, "Methanosarcina")
+
+# Root Using Outgroup w/o removing neighbors
+ml.seqs.rooted <- root(ml.seqs, "Methanosarcina", resolve.root = T)
+ml.seqs.root.rooted <- root(ml.seqs.root, "Methanosarcina")
+ml.seqs.root.rooted$node.label[1] <- "Root"
+ml.seqs_wn.rooted <- root(ml.seqs_wn, "Methanosarcina", resolve.root = T)
+ml.seqs_wn.root.rooted <- root(ml.seqs_wn.root, "Methanosarcina")
+ml.seqs_wn.root.rooted$node.label[1] <- "Root"
+
+# Remove neighbor tip labs
+ml.seqs.rooted$tip.label[which(!ml.seqs.rooted$tip.label %in% ptrait.samps)] <- ""
+ml.seqs.root.rooted$tip.label[which(!ml.seqs.root.rooted$tip.label %in% ptrait.samps)] <- ""
+ml.seqs_wn.rooted$tip.label[which(!ml.seqs_wn.rooted$tip.label %in% ptrait.samps)] <- ""
+ml.seqs_wn.rooted$tip.label[which(!ml.seqs_wn.rooted$tip.label %in% ptrait.samps)] <- ""
+```
+
+
+```{r}
+png(filename="../figures/Phylogeny.png",
+    width = 2400, height = 2400, res = 96*2, bg = "white")
+par(opar)
+
+layout(matrix(1:4, nrow = 2, byrow = F))
+par(mar = c(1, 1, 1, 1), oma = c(4, 4, 0, 0) + 0.1)
+
+# Plot A: PhosTrait Seq w/o Neighbors w/o Rooting
+plot.phylo(ml.seqs.rooted, type = "phylogram", 
+           direction = "right", show.tip.label=TRUE,
+           use.edge.length = FALSE, cex = 0.6, label.offset = 1, 
+           main = "Seq w/o Neighbors w/o Rooting")
+add.scale.bar(cex = 0.7)
+nodelabels(ml.seqs.rooted$node.label, font = 2, bg = "white", 
+           frame = "none", cex = 0.4, adj = c(1.2, 1.2), col = "red")
+
+# Plot B: PhosTrait Seq w/o Neighbors w/ Rooting
+plot.phylo(ml.seqs.root.rooted, type = "phylogram", 
+           direction = "right", show.tip.label=TRUE,
+           use.edge.length = FALSE, cex = 0.6, label.offset = 1, 
+           main = "Seq w/o Neighbors w/ Rooting")
+add.scale.bar(cex = 0.7)
+nodelabels(ml.seqs.root.rooted$node.label, font = 2, bg = "white", 
+           frame = "none", cex = 0.4, adj = c(1.2, 1.2), col = "red")
+
+# Plot C: PhosTrait Seq w/ Neighbors w/o Rooting
+plot.phylo(ml.seqs_wn.rooted, type = "phylogram", 
+           direction = "right", show.tip.label=TRUE,
+           use.edge.length = FALSE, cex = 0.6, label.offset = 1, 
+           main = "Seq w/ Neighbors w/o Rooting")
+add.scale.bar(cex = 0.7)
+nodelabels(ml.seqs_wn.rooted$node.label, font = 2, bg = "white", 
+           frame = "none", cex = 0.4, adj = c(1.2, 1.2), col = "red")
+
+# Plot D: PhosTrait Seq w/ Neighbors w/ Rooting
+plot.phylo(ml.seqs_wn.rooted, type = "phylogram", 
+           direction = "right", show.tip.label=TRUE,
+           use.edge.length = FALSE, cex = 0.6, label.offset = 1, 
+           main = "MPhosTrait Seq w/ Neighbors w/ Rooting")
+add.scale.bar(cex = 0.7)
+nodelabels(ml.seqs_wn.rooted$node.label, font = 2, bg = "white", 
+           frame = "none", cex = 0.4, adj = c(1.2, 1.2), col = "red")
+
+dev.off() 
+graphics.off()
+
+img <- readPNG("../figures/Phylogeny.png")
+grid.raster(img)
+
+
+
+
+```
+
