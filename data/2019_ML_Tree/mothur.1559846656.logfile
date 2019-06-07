@@ -1,0 +1,317 @@
+Mac version
+
+Using ReadLine,Boost,HDF5
+mothur v.1.41.2
+Last updated: 1/23/19
+by
+Patrick D. Schloss
+
+Department of Microbiology & Immunology
+
+University of Michigan
+http://www.mothur.org
+
+When using, please cite:
+Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.
+
+Distributed under the GNU General Public License
+
+Type 'help()' for information on the commands that are available
+
+For questions and analysis support, please visit our forum at https://www.mothur.org/forum
+
+Type 'quit()' to exit program
+
+Interactive Mode
+
+
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1006	21303	597	0	4	1
+2.5%-tile:	1060	21922	619	0	4	2
+25%-tile:	1147	22588	675	0	5	11
+Median: 	1459	26392	716	0	5	21
+75%-tile:	1773	27581	803	0	5	31
+97.5%-tile:	2063	43113	1426	15	8	40
+Maximum:	2063	43113	1426	15	8	40
+Mean:	1413	26940	787	0	5
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.summary
+
+
+mothur > screen.seqs(fasta=20190606_PhosTrait_Sina.fasta, start=1006, end=21303)
+
+Using 4 processors.
+
+It took 0 secs to screen 40 sequences, removed 39.
+
+
+Output File Names: 
+20190606_PhosTrait_Sina.good.fasta
+20190606_PhosTrait_Sina.bad.accnos
+
+
+It took 0 secs to screen 40 sequences.
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.good.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1006	43113	1426	15	8	1
+2.5%-tile:	1006	43113	1426	15	8	1
+25%-tile:	1006	43113	1426	15	8	1
+Median: 	1006	43113	1426	15	8	1
+75%-tile:	1006	43113	1426	15	8	1
+97.5%-tile:	1006	43113	1426	15	8	1
+Maximum:	1006	43113	1426	15	8	1
+Mean:	1006	43113	1426	15	8
+# of Seqs:	1
+
+It took 0 secs to summarize 1 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.good.summary
+
+
+mothur > pcr.seqs(fasta=20190606_PhosTrait_Sina.fasta, start=1006, end=21303)
+
+Using 4 processors.
+[NOTE]: no sequences were bad, removing 20190606_PhosTrait_Sina.bad.accnos
+
+It took 0 secs to screen 40 sequences.
+
+Output File Names: 
+20190606_PhosTrait_Sina.pcr.fasta
+
+
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.pcr.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1006	21303	516	0	4	1
+2.5%-tile:	1060	21303	520	0	4	2
+25%-tile:	1147	21303	541	0	5	11
+Median: 	1459	21303	575	0	5	21
+75%-tile:	1773	21303	585	0	5	31
+97.5%-tile:	2063	21303	602	1	5	40
+Maximum:	2063	21303	602	1	5	40
+Mean:	1413	21303	564	0	4
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.pcr.summary
+
+
+mothur > pcr.seqs(fasta=20190606_PhosTrait_Sina.fasta, start=1006, end=21303, keepdots=false))
+
+Using 4 processors.
+[NOTE]: no sequences were bad, removing 20190606_PhosTrait_Sina.bad.accnos
+
+It took 1 secs to screen 40 sequences.
+
+Output File Names: 
+20190606_PhosTrait_Sina.pcr.fasta
+
+
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.pcr.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	20297	516	0	4	1
+2.5%-tile:	54	20297	520	0	4	2
+25%-tile:	141	20297	541	0	5	11
+Median: 	453	20297	575	0	5	21
+75%-tile:	767	20297	585	0	5	31
+97.5%-tile:	1057	20297	601	1	5	40
+Maximum:	1057	20297	601	1	5	40
+Mean:	408	20297	564	0	4
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.pcr.summary
+
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.pcr.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	20297	516	0	4	1
+2.5%-tile:	54	20297	520	0	4	2
+25%-tile:	141	20297	541	0	5	11
+Median: 	453	20297	575	0	5	21
+75%-tile:	767	20297	585	0	5	31
+97.5%-tile:	1057	20297	601	1	5	40
+Maximum:	1057	20297	601	1	5	40
+Mean:	408	20297	564	0	4
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.pcr.summary
+
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1006	21303	597	0	4	1
+2.5%-tile:	1060	21922	619	0	4	2
+25%-tile:	1147	22588	675	0	5	11
+Median: 	1459	26392	716	0	5	21
+75%-tile:	1773	27581	803	0	5	31
+97.5%-tile:	2063	43113	1426	15	8	40
+Maximum:	2063	43113	1426	15	8	40
+Mean:	1413	26940	787	0	5
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.summary
+
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Sina, verticle=T)
+verticle is not a valid parameter.
+The valid parameters are: fasta, hard, trump, soft, vertical, processors, seed, inputdir, and outputdir.
+Unable to open 20190606_PhosTrait_Sina. Trying default /usr/local/bin/20190606_PhosTrait_Sina.
+Unable to open /usr/local/bin/20190606_PhosTrait_Sina. Trying mothur's executable location /usr/local/bin/20190606_PhosTrait_Sina.
+Unable to open /usr/local/bin/20190606_PhosTrait_Sina.
+no valid files.
+
+Using 4 processors.
+[ERROR]: did not complete filter.seqs.
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Sina.fasta, verticle=T(
+[ERROR]: You are missing )
+[ERROR]: Invalid.
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Sina.fasta, verticle=T)
+verticle is not a valid parameter.
+The valid parameters are: fasta, hard, trump, soft, vertical, processors, seed, inputdir, and outputdir.
+
+Using 4 processors.
+[ERROR]: did not complete filter.seqs.
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Sina.fasta, verticle=T)
+verticle is not a valid parameter.
+The valid parameters are: fasta, hard, trump, soft, vertical, processors, seed, inputdir, and outputdir.
+
+Using 4 processors.
+[ERROR]: did not complete filter.seqs.
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Sina.fasta, vertical=T)
+
+Using 4 processors.
+Creating Filter... 
+It took 0 secs to create filter for 40 sequences.
+
+
+Running Filter... 
+It took 0 secs to filter 40 sequences.
+
+
+
+Length of filtered alignment: 1552
+Number of columns removed: 48448
+Length of the original alignment: 50000
+Number of sequences used to construct filter: 40
+
+Output File Names: 
+20190606_PhosTrait_Sina.filter
+20190606_PhosTrait_Sina.filter.fasta
+
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.filter.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	692	597	0	4	1
+2.5%-tile:	28	730	619	0	4	2
+25%-tile:	62	813	675	0	5	11
+Median: 	80	879	716	0	5	21
+75%-tile:	98	937	803	0	5	31
+97.5%-tile:	127	1552	1426	15	8	40
+Maximum:	127	1552	1426	15	8	40
+Mean:	77	922	787	0	5
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.filter.summary
+
+
+mothur > filter.seqs(fasta=20190606_PhosTrait_Sina.fasta, vertical=T, trump=.))
+
+Using 4 processors.
+Creating Filter... 
+It took 0 secs to create filter for 40 sequences.
+
+
+Running Filter... 
+It took 0 secs to filter 40 sequences.
+
+
+
+Length of filtered alignment: 566
+Number of columns removed: 49434
+Length of the original alignment: 50000
+Number of sequences used to construct filter: 40
+
+Output File Names: 
+20190606_PhosTrait_Sina.filter
+20190606_PhosTrait_Sina.filter.fasta
+
+
+mothur > summary.seqs(fasta=20190606_PhosTrait_Sina.filter.fasta)
+
+Using 4 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	566	496	0	4	1
+2.5%-tile:	1	566	496	0	4	2
+25%-tile:	1	566	517	0	5	11
+Median: 	1	566	533	0	5	21
+75%-tile:	1	566	535	0	5	31
+97.5%-tile:	1	566	545	1	5	40
+Maximum:	1	566	545	1	5	40
+Mean:	1	566	522	0	4
+# of Seqs:	40
+
+It took 0 secs to summarize 40 sequences.
+
+Output File Names:
+ 20190606_PhosTrait_Sina.filter.summary
+
+
+mothur > quit()
+
+
+************************************************************
+************************************************************
+************************************************************
+Detected 5 [ERROR] messages, please review.
+************************************************************
+************************************************************
+************************************************************
