@@ -53,10 +53,12 @@ raxmlHPC-PTHREADS -T 12 -f a -m GTRCAT -p 12345 -x 12345 -o Methanosarcina  \
 
 
 Output:
-RAxML_bipartitions.PhosRAxML_20190606    
-RAxML_bipartitions.PhosRAxML_20190606_Neighbors  
-RAxML_bipartitions.PhosRAxML_20190606_Neighbors_Root 
+RAxML_bipartitions.PhosRAxML_20190606     
 RAxML_bipartitions.PhosRAxML_20190606_Root  
+RAxML_bipartitions.PhosRAxML_20190606_Neighbors  
+RAxML_bipartitions.PhosRAxML_20190606_Neighbors_Root
+RAxML_bipartitions.PhosRAxML_20190607_Neighbors  
+RAxML_bipartitions.PhosRAxML_20190607_Neighbors_Root
 
 
 ----------------------------------------
