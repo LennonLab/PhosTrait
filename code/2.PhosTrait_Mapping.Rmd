@@ -69,11 +69,14 @@ colnames(nb) <- c("nb")
 # Read Alignment File {seqinr}
 read.aln <- read.alignment(file = "./data/2019_ML_Tree/20190322_PhosTrait.fasta", format = "fasta")  
 
+read.aln <- read.alignment(file = "./data/2019_ML_Tree/20190606_PhosTrait_Sina.filter.fasta", format = "fasta")  
+
 # Convert Alignment File to DNAbin Object {ape}
 p.DNAbin <- as.DNAbin(read.aln) 
+dim(p.DNAbin)
 
 # Identify Base Pair Region of 16S rRNA Gene to Visuzlize
-window <- p.DNAbin[,0:900] 
+window <- p.DNAbin[,0:566] 
 
 # Command to Visusalize Sequence Alignment {ape}
 image.DNAbin(window, cex.lab = 0.50) 
@@ -86,51 +89,51 @@ grid(nrow(window), col = "lightgrey")
 ```{r}
 # Keep Rooted but Drop Outgroup Branch
 #ml.bootstrap.out <- read.tree("./data/ml_tree/RAxML_bipartitions.T1")
-ml.bootstrap.out <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.OutPhos")
-ml.full <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_Full")
-ml.short <- read.tree("./data/2019_ML_Tree/RAxML_bipartitionsBranchLabels.PhosRAxML_Short")
-ml.full.root <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_FullRoot")
-ml.short.root <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_ShortRoot")
+# ml.bootstrap.out <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.OutPhos")
+# ml.full <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_Full")
+# ml.short <- read.tree("./data/2019_ML_Tree/RAxML_bipartitionsBranchLabels.PhosRAxML_Short")
+# ml.full.root <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_FullRoot")
+# ml.short.root <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_ShortRoot")
 
 
-ml.short$
-  
-  node.label
+ml.new <- read.tree("./data/2019_ML_Tree/RAxML_bipartitions.PhosRAxML_20190607_Neighbors")
 
 # Remove Neighbors
 ptrait.samps <- c(row.names(gr.data), "Methanosarcina")
-neighbors <- setdiff(ml.bootstrap.out$tip.label, ptrait.samps)
-ml.bootstrap.samps <- ape::drop.tip(ml.bootstrap.out, neighbors)
+neighbors <- setdiff(ml.new$tip.label, ptrait.samps)
+ml.bootstrap.samps <- ape::drop.tip(ml.new, neighbors)
 
-ml.full.samps <- ape::drop.tip(ml.full, setdiff(ml.full$tip.label, ptrait.samps))
-ml.short.samps <- ape::drop.tip(ml.short, setdiff(ml.short$tip.label, ptrait.samps))
-ml.full.root.samps <- ape::drop.tip(ml.full.root, setdiff(ml.full.root$tip.label, ptrait.samps))
-ml.short.root.samps <- ape::drop.tip(ml.short.root, setdiff(ml.short.root$tip.label, ptrait.samps))
+# ml.full.samps <- ape::drop.tip(ml.full, setdiff(ml.full$tip.label, ptrait.samps))
+# ml.short.samps <- ape::drop.tip(ml.short, setdiff(ml.short$tip.label, ptrait.samps))
+# ml.full.root.samps <- ape::drop.tip(ml.full.root, setdiff(ml.full.root$tip.label, ptrait.samps))
+# ml.short.root.samps <- ape::drop.tip(ml.short.root, setdiff(ml.short.root$tip.label, ptrait.samps))
 
 # Root Using Outgroup
-ml.bootstrap.rooted <- root(ml.bootstrap.samps, "Methanosarcina")
-ml.full.samps.rooted <- root(ml.full.samps, "Methanosarcina")
-ml.short.samps.rooted <- root(ml.short.samps, "Methanosarcina")
-ml.full.root.samps.rooted <- ml.full.root.samps
-ml.short.root.samps.rooted <- ml.short.root.samps
+# ml.bootstrap.rooted <- root(ml.bootstrap.samps, "Methanosarcina")
+# ml.full.samps.rooted <- root(ml.full.samps, "Methanosarcina")
+# ml.short.samps.rooted <- root(ml.short.samps, "Methanosarcina")
+# ml.full.root.samps.rooted <- ml.full.root.samps
+# ml.short.root.samps.rooted <- ml.short.root.samps
 
-
+ml.new.rooted <- root(ml.bootstrap.samps, "Methanosarcina")
 
 # Outgroup
-ml.bootstrap <- ape::drop.tip(ml.bootstrap.rooted, "Methanosarcina")
-ml.full.bootstrap <- ape::drop.tip(ml.full.samps.rooted, "Methanosarcina")
-ml.short.bootstrap <- ape::drop.tip(ml.short.samps.rooted, "Methanosarcina")
-ml.full.root.bootstrap <- ape::drop.tip(ml.full.root.samps.rooted, "Methanosarcina")
-ml.short.root.bootstrap <- ape::drop.tip(ml.short.root.samps.rooted, "Methanosarcina", trim.internal = TRUE)
+#ml.bootstrap <- ape::drop.tip(ml.bootstrap.rooted, "Methanosarcina")
+# ml.full.bootstrap <- ape::drop.tip(ml.full.samps.rooted, "Methanosarcina")
+# ml.short.bootstrap <- ape::drop.tip(ml.short.samps.rooted, "Methanosarcina")
+# ml.full.root.bootstrap <- ape::drop.tip(ml.full.root.samps.rooted, "Methanosarcina")
+# ml.short.root.bootstrap <- ape::drop.tip(ml.short.root.samps.rooted, "Methanosarcina", trim.internal = TRUE)
+
+ml.bootstrap <- ape::drop.tip(ml.new.rooted, "Methanosarcina")
 
 
 
 par(mar = c(1,2,2,1) + 0.1)
-plot.phylo(ml.short.root.bootstrap, type = "phylogram", direction = "right", show.tip.label=TRUE,
+plot.phylo(ml.bootstrap, type = "phylogram", direction = "right", show.tip.label=TRUE,
            use.edge.length = FALSE, cex = 0.6, label.offset = 1, 
            main = "Maximum Likelihood with Support Values")
 add.scale.bar(cex = 0.7)
-nodelabels(ml.short.root.bootstrap$node.label, font = 2, bg = "white", frame = "r", cex = 0.5)
+nodelabels(ml.bootstrap$node.label, font = 2, bg = "white", frame = "r", cex = 0.5)
 ```
 
 # Add P traits to Maximum Likelihood tree
