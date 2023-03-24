@@ -1,0 +1,13 @@
+40 sequences and 1500 positions in the first alignment file:
+16S_sequences.fasta_aln.fa
+
+
+WARNING: Parameter -b1 not properly entered.
+The minimum number of sequences for a conserved position must be bigger than or equal to 21 (half the number of sequences + 1)
+
+WARNING: minimum number of sequences for a flank position set to the minimum possible value.
+16S_sequences.fasta_aln.fa
+Original alignment: 1500 positions
+Gblocks alignment:  674 positions (44 %) in 11 selected block(s)
+
+16S_sequences.fasta
